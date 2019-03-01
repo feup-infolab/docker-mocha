@@ -3,7 +3,7 @@ version: '3.5'
 services:
   dendro:
     container_name: ${TEST_NAME}.dendro
-    image: nuno/node-currency
+    image: nuno/node-currency:${TEST_NAME}
     build:
       context: .
       dockerfile: Dockerfile
@@ -13,7 +13,7 @@ services:
           - dendro
   mongo:
     container_name: ${TEST_NAME}.mongo
-    image: nuno/node-currency
+    image: nuno/node-currency:${TEST_NAME}
     build:
       context: .
       dockerfile: Dockerfile
