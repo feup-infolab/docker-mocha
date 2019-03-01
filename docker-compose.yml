@@ -1,0 +1,27 @@
+version: '3.5'
+
+services:
+  dendro:
+    container_name: ${TEST_NAME}.dendro
+    image: nuno/node-currency
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      custom_net:
+        aliases:
+          - dendro
+  mongo:
+    container_name: ${TEST_NAME}.mongo
+    image: nuno/node-currency
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      custom_net:
+        aliases:
+          - mongo
+networks:
+  custom_net:
+    name: ${TEST_NAME}
+    driver: bridge
