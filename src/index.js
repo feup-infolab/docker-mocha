@@ -102,8 +102,9 @@ exports.start = (callback, port = 3000) =>
 
     server = app.listen(port, () =>
     {
-        console.log(`Example app listening on port ${port}!`);
-        callback();
+        console.log(`App listening on port ${port}!`);
+        if(callback != null)
+            callback();
     });
 
     exports.server = server;
@@ -112,6 +113,7 @@ exports.start = (callback, port = 3000) =>
 
 exports.stop = () =>
 {
+    console.log('Closing app!');
     this.server.close();
 };
 
