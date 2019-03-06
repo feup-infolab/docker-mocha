@@ -1,7 +1,7 @@
 {
   "name": "setupcachingtest",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha",
     "start": "node index.js"
