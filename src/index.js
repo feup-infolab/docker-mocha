@@ -1,6 +1,6 @@
 const express = require('express');
 const fs = require('fs');
-const folder = '../resources';
+const folder = 'resources';
 const file = 'currency.json';
 const path = folder + '/' + file;
 
@@ -79,7 +79,7 @@ exports.start = (callback, port = 3000) =>
             else
             {
                 let obj = JSON.parse(data);
-                const value = obj.dollar * req.query.euro;
+                const value = (obj.dollar * req.query.euro).toFixed(2);
                 res.json({error: 0, dollars: value});
             }
         });
@@ -94,8 +94,8 @@ exports.start = (callback, port = 3000) =>
             else
             {
                 let obj = JSON.parse(data);
-                const value = obj.pound * req.query.euro;
-                res.json({error: 0, dollars: value});
+                const value = (obj.pound * req.query.euro).toFixed(2);;
+                res.json({error: 0, pounds: value});
             }
         });
     });

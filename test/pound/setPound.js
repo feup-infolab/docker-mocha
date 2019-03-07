@@ -3,10 +3,10 @@ const request = require('request');
 const init = require("../init");
 const port = 3000;
 
-const dollar = 1.13;
+const pound = 0.86;
 
 
-describe('Testing set Dollar', function()
+describe('Testing set Pound', function()
 {
     this.timeout(5000);
 
@@ -14,7 +14,7 @@ describe('Testing set Dollar', function()
     {
         init.setup(() =>
         {
-            request('http://localhost:' + port + '/add/dollar?value=' + dollar, {json:true}, (err, res, body) =>
+            request('http://localhost:' + port + '/add/pound?value=' + pound, {json:true}, (err, res, body) =>
             {
                 assert.equal(200, res.statusCode);
                 assert.equal(body.error, 0);
@@ -24,14 +24,14 @@ describe('Testing set Dollar', function()
     })
 });
 
-exports.setup = (done, dollarVal) =>
+exports.setup = (done, poundVal) =>
 {
-    if(dollarVal === null)
-        dollarVal = dollar;
+    if(poundVal === null)
+        poundVal = pound;
 
     init.setup(() =>
     {
-        request('http://localhost:' + port + '/add/dollar?value=' + dollarVal, {json:true}, (err, res, body) =>
+        request('http://localhost:' + port + '/add/pound?value=' + poundVal, {json:true}, (err, res, body) =>
         {
             done();
         })
