@@ -5,3 +5,7 @@ Setup Caching (Dissertation Nuno Neto)
 - Install Docker CE
 - Install Docker Compose
 - Run  ```docker compose up -d ```
+
+## Current test approach and dependency tree
+
+![Repository dependency tree](https://github.com/feup-infolab/setup-caching/blob/master/images/setup-cachingTests.png)
