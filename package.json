@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha test --recursive",
-    "test-docker": "docker-compose -f docker-compose.test.yml up",
+    "test-docker": "docker-compose -f docker-compose.test.yml up && docker-compose -f docker-compose.test.yml down",
     "start": "node server.js"
   },
   "author": "",

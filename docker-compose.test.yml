@@ -2,8 +2,8 @@ version: '3.5'
 
 services:
   dendro:
-    container_name: ${TEST_NAME}.dendro
-    image: nuno/node-currency:${TEST_NAME}
+    container_name: ${TEST_DOCKER_NAME}.dendro
+    image: nuno/node-currency:${TEST_DOCKER_NAME}
     build:
       context: .
       dockerfile: Dockerfile.test
@@ -14,5 +14,5 @@ services:
 
 networks:
   custom_net:
-    name: ${TEST_NAME}
+    name: ${TEST_DOCKER_NAME}
     driver: bridge
