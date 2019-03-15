@@ -134,8 +134,10 @@ else
             tests[i].setup = setup;
             dockerMocha.addTest(tests[i]);
         }
-
+        else
+            console.warn("Ignored: " + JSON.stringify(tests[i]));
     }
 
+    console.log("\nAdded the following tests: ");
     dockerMocha.print();
 }
