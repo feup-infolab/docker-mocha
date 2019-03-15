@@ -2,8 +2,6 @@ version: '3.5'
 
 services:
   dendro:
-    environment:
-      - TEST_NAME=defaultTag
     container_name: ${TEST_NAME}.dendro
     image: nuno/node-currency:${TEST_NAME}
     build:

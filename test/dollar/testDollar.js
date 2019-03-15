@@ -14,16 +14,15 @@ describe('Testing get Dollar', function()
 
     it('should give error code 0 and return converted value', (done) =>
     {
-        setDollar.setup(() =>
+
+        request('http://localhost:' + port + '/get/dollar?euro=' + euro, {json:true}, (err, res, body) =>
         {
-            request('http://localhost:' + port + '/get/dollar?euro=' + euro, {json:true}, (err, res, body) =>
-            {
-                assert.equal(200, res.statusCode);
-                assert.equal(body.error, 0);
-                assert.equal(body.dollars, value);
-                done();
-            })
-        }, dollar);
+            assert.equal(200, res.statusCode);
+            assert.equal(body.error, 0);
+            assert.equal(body.dollars, value);
+            done();
+        })
+
     })
 });
 

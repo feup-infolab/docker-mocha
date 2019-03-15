@@ -5,11 +5,13 @@
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha test --recursive",
     "test-docker": "docker-compose -f docker-compose.test.yml up && docker-compose -f docker-compose.test.yml down",
+    "docker-mocha": "node ./docker-mocha/docker-mocha.js -f tests.json",
     "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "better-queue": "^3.8.10",
     "express": "^4.16.4",
     "request": "^2.88.0"
   },

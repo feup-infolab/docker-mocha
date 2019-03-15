@@ -16,7 +16,6 @@ afterEach(() =>
 
 describe('Testing server requests', function()
 {
-
     describe('Testing hello world', function ()
     {
         this.timeout(5000);

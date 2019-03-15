@@ -12,15 +12,13 @@ describe('Testing set Pound', function()
 
     it('should give error code 0', (done) =>
     {
-        init.setup(() =>
+
+        request('http://localhost:' + port + '/add/pound?value=' + pound, {json:true}, (err, res, body) =>
         {
-            request('http://localhost:' + port + '/add/pound?value=' + pound, {json:true}, (err, res, body) =>
-            {
-                assert.equal(200, res.statusCode);
-                assert.equal(body.error, 0);
-                done();
-            })
-        });
+            assert.equal(200, res.statusCode);
+            assert.equal(body.error, 0);
+            done();
+        })
     })
 });
 

@@ -14,17 +14,15 @@ describe('Testing get Pound', function()
 
     it('should give error code 0 and return converted value', (done) =>
     {
-        setPound.setup(() =>
+
+        request('http://localhost:' + port + '/get/pound?euro=' + euro, {json:true}, (err, res, body) =>
         {
-            request('http://localhost:' + port + '/get/pound?euro=' + euro, {json:true}, (err, res, body) =>
-            {
-                assert.equal(200, res.statusCode);
-                assert.equal(body.error, 0);
-                assert.equal(body.pounds, value);
-                done();
-            })
-        }, pound);
-    })
+            assert.equal(200, res.statusCode);
+            assert.equal(body.error, 0);
+            assert.equal(body.pounds, value);
+            done();
+        })
+    }, pound);
 });
 
 

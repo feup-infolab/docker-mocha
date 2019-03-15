@@ -1,0 +1,7 @@
+[
+  {"title": "Init", "file": "./test/init.js", "setup": null},
+  {"title": "SetDollar", "file": "./test/dollar/setDollar.js", "setup": "./test/init.js"},
+  {"title": "testDollar", "file": "./test/dollar/testDollar.js", "setup": "./test/dollar/setDollar.js"},
+  {"title": "SetPound", "file": "./test/pound/setPound.js", "setup": "./test/init.js"},
+  {"title": "testDollar", "file": "./test/dollar/testDollar.js", "setup": "./test/dollar/setDollar.js"}
+]
