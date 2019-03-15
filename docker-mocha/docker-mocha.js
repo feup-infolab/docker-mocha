@@ -90,22 +90,28 @@ else
     let fileToUse = null;
 
     if(!overrideExists)
+    {
         fileToUse = defaultFile;
+        console.warn("Override file not found using default File");
+    }
     else
+    {
         fileToUse = overrideFile;
+        console.warn("Using override file");
+    }
 
     const tests = JSON.parse(fs.readFileSync(fileToUse, 'utf8'));
     const dockerMocha = new DockerMocha();
 
     for(let i in tests)
     {
-        const file = path.join(process.cwd(), tests[i].file);
+        const file = path.join(path.dirname(fileToUse), tests[i].file);
         let setup;
 
         if(tests[i].setup === null)
             setup = null;
         else
-            setup = path.join(process.cwd(), tests[i].setup);
+            setup = path.join(path.dirname(fileToUse), tests[i].setup);
 
         let fileExists = false;
         let setupExists = false;
