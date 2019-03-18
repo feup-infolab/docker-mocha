@@ -1,51 +1,13 @@
-class DockerMocha
-{
-    constructor()
-    {
-        this.testList = [];
-
-    }
-
-    addTest(test)
-    {
-        if(test.title && test.file)
-        {
-            this.testList.push({title: test.title, file: test.file, setup: test.setup});
-            return true;
-        }
-        else
-            return false;
-    }
-
-    getTests()
-    {
-        return this.testList;
-    }
-
-    print()
-    {
-
-
-        for(let i in this.testList)
-        {
-            const test = this.testList[i];
-            console.log("Title: " + test.title + "; File: " + test.file + "; Setup: " + test.setup);
-        }
-    }
-}
-
-module.exports = DockerMocha;
-
-/**
- * The script itself
- */
-
+const DockerMocha = require("./DockerMocha");
 const path = require("path");
 const fs = require("fs");
 
 const defaultFileName = "tests.json";
 const defaultFile = path.join(process.cwd(), defaultFileName);
 let overrideFile = null;
+
+const DEFAULT_TRHEAD = 4;
+let threadsNumber = DEFAULT_TRHEAD;
 
 let defaultExists = false;
 let overrideExists = false;
@@ -60,10 +22,20 @@ for(let i in process.argv)
             overrideFile = path.join(process.cwd(), process.argv[Number(i) + 1]);
         }
     }
+
+    //Check if threads flag exists
+    if(process.argv[i] === "-t" || process.argv[i] === "--threads")
+    {
+        if((Number(i) + 1) < process.argv.length && Number.isInteger(Number(process.argv[Number(i) + 1])))
+        {
+            threadsNumber = Number(process.argv[Number(i) + 1])
+        }
+    }
 }
 
 try
 {
+    //verify if the other *.json tests file exists
     if(overrideFile != null && fs.existsSync(overrideFile))
         overrideExists = true;
 }
@@ -72,6 +44,7 @@ catch(err) {
 
 try
 {
+    //verify if the default *.json tests file exists
     if(defaultFile != null && fs.existsSync(defaultFile))
         defaultExists = true;
 }
@@ -100,9 +73,11 @@ else
         console.warn("Using override file");
     }
 
+    //Parsing tests from *.json tests file
     const tests = JSON.parse(fs.readFileSync(fileToUse, 'utf8'));
     const dockerMocha = new DockerMocha();
 
+    //For each test verify if the test file and setup file exist. Add to docker mocha if positive
     for(let i in tests)
     {
         const file = path.join(path.dirname(fileToUse), tests[i].file);
@@ -143,6 +118,8 @@ else
         else
             console.warn("Ignored: " + JSON.stringify(tests[i]));
     }
+
+    //Launch docker-mocha
 
     console.log("\nAdded the following tests: ");
     dockerMocha.print();
