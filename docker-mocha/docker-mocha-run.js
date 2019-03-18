@@ -12,6 +12,9 @@ let threadsNumber = DEFAULT_TRHEAD;
 let defaultExists = false;
 let overrideExists = false;
 
+const dockerMocha = new DockerMocha();
+let running = 0;
+
 for(let i in process.argv)
 {
     //Check if file flag exists
@@ -75,7 +78,6 @@ else
 
     //Parsing tests from *.json tests file
     const tests = JSON.parse(fs.readFileSync(fileToUse, 'utf8'));
-    const dockerMocha = new DockerMocha();
 
     //For each test verify if the test file and setup file exist. Add to docker mocha if positive
     for(let i in tests)
@@ -119,8 +121,40 @@ else
             console.warn("Ignored: " + JSON.stringify(tests[i]));
     }
 
-    //Launch docker-mocha
-
     console.log("\nAdded the following tests: ");
     dockerMocha.print();
+
+    execute();
+}
+
+function execute()
+{
+    if(dockerMocha.testList.length > 0 || running > 0)
+    {
+        if(dockerMocha.testList.length > 0 && running < threadsNumber)
+        {
+            test = dockerMocha.testList[0];
+            dockerMocha.testList.shift();
+
+            dummy(test, () =>
+            {
+                running--;
+            });
+
+            running++;
+        }
+
+        setTimeout(execute, 100);
+    }
+    else
+    {
+        process.exit(0);
+    }
+}
+
+
+function dummy(test, callback)
+{
+    console.log(test);
+    setTimeout(callback, 1000);
 }

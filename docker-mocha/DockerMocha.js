@@ -3,7 +3,6 @@ class DockerMocha
     constructor()
     {
         this.testList = [];
-
     }
 
     addTest(test)
