@@ -17,25 +17,16 @@ data = json.load(open(sys.argv[1]))
 G = nx.DiGraph()
 
 for test in data:
-    G.add_edge(test["file"], test["setup"])
+    fileExists = os.path.exists(os.path.join(os.path.dirname(sys.argv[1]), test["file"]))
+    setupExists = False
 
-# mymap = {}
-# labels = {}
-# iter = 0
+    if test["setup"] == None:
+        setupExists = True
+    else:
+        setupExists = os.path.exists(os.path.join(os.path.dirname(sys.argv[1]), test["setup"]))
 
-# for test in data:
-#     if test["file"] not in mymap:
-#         mymap[test["file"]] = iter
-#         labels[iter] = test["title"]
-#         iter += 1
-
-# for test in data:
-#     if test["setup"] not in mymap:
-#         mymap[test["setup"]] = iter
-#         iter += 1
-    
-#for test in data:
-
+    if  fileExists and setupExists:
+        G.add_edge(test["file"], test["setup"])
 
 nx.draw(G, with_labels=True)
 
