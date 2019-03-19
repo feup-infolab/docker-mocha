@@ -6,6 +6,8 @@ const defaultFileName = "tests.json";
 const defaultFile = path.join(process.cwd(), defaultFileName);
 let overrideFile = null;
 
+const TIMEOUT = 100;
+
 const DEFAULT_TRHEAD = 4;
 let threadsNumber = DEFAULT_TRHEAD;
 
@@ -82,13 +84,17 @@ else
     //For each test verify if the test file and setup file exist. Add to docker mocha if positive
     for(let i in tests)
     {
-        const file = path.join(path.dirname(fileToUse), tests[i].file);
+        let file = path.join(path.dirname(fileToUse), tests[i].file);
+        file = path.relative(process.cwd(), file);
+
         let setup;
 
         if(tests[i].setup === null)
             setup = null;
-        else
+        else {
             setup = path.join(path.dirname(fileToUse), tests[i].setup);
+            setup = path.relative(process.cwd(), setup);
+        }
 
         let fileExists = false;
         let setupExists = false;
@@ -124,19 +130,19 @@ else
     console.log("\nAdded the following tests: ");
     dockerMocha.print();
 
-    execute();
+    manager();
 }
 
-function execute()
+function manager()
 {
     if(dockerMocha.testList.length > 0 || running > 0)
     {
         if(dockerMocha.testList.length > 0 && running < threadsNumber)
         {
-            test = dockerMocha.testList[0];
+            let test = dockerMocha.testList[0];
             dockerMocha.testList.shift();
 
-            dummy(test, () =>
+            runTest(test, () =>
             {
                 running--;
             });
@@ -144,7 +150,7 @@ function execute()
             running++;
         }
 
-        setTimeout(execute, 100);
+        setTimeout(manager, TIMEOUT);
     }
     else
     {
@@ -153,8 +159,15 @@ function execute()
 }
 
 
-function dummy(test, callback)
+function runTest(test, callback)
 {
+    //check if setup exists
+        //create if not
+    //restore state
+
+    //run the test
+
+
     console.log(test);
     setTimeout(callback, 1000);
 }
