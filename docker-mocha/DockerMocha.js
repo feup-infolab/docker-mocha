@@ -16,11 +16,6 @@ class DockerMocha
             return false;
     }
 
-    getTests()
-    {
-        return this.testList;
-    }
-
     print()
     {
 
