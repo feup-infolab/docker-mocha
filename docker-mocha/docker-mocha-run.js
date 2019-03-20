@@ -200,15 +200,24 @@ function runTest(test, callback)
      * run the test
      */
 
-
     DockerManager.checkpointExists(test.title, composeFile,(exists) =>
     {
         if(exists === null)
         {
-            console.log("Failed to verify if checkpoint exists");
+            console.error("Failed to verify if checkpoint exists");
             callback();
         }
         else
+        {
+            if(!exists)
+            {
+                //create checkpoint
+                //restore state
+            }
+
+
             callback();
+        }
+
     });
 }

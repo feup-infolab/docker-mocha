@@ -1,5 +1,6 @@
 const childProcess = require("child_process");
 const yaml = require("js-yaml");
+const async = require("async");
 const fs = require("fs");
 
 const DockerManager = function ()
@@ -14,7 +15,36 @@ DockerManager.checkpointExists = function(checkpointName, composeFile, callback)
         if(services === null)
             callback(null);
         else
-            callback(false);
+        {
+            async.mapSeries(services,
+                (service, callback) =>
+                {
+                    childProcess.exec(`docker image inspect "${service.image}:${checkpointName}"`,
+                        (err, result) =>
+                        {
+                            if(!err && result)
+                            {
+                                callback(null, true)
+                            }
+                            else
+                            {
+                                callback(null, false);
+                            }
+                        })
+                },
+                (err, results)=>
+                {
+                    for(let i in results)
+                    {
+                        if (results[i] === false)
+                        {
+                            callback(false);
+                            return;
+                        }
+                    }
+                    callback(true);
+                });
+        }
     });
 };
 
@@ -47,10 +77,23 @@ DockerManager.getAllServicesInOrchestra = function(composeFile, callback)
         }
     }
 
-    const containerKeys = Object.keys(dockerCompose.services);
+    const services = Object.keys(dockerCompose.services);
+    let servicesInfo = [];
 
-    console.log(containerKeys);
-    callback(containerKeys);
+    for(let i in services)
+    {
+        let service = services[i];
+        let container = dockerCompose.services[service];
+
+        servicesInfo.push({
+            service: service,
+            name: container.container_name,
+            image: container.image.replace(/:\${.*}/g, "")
+        });
+
+    }
+
+    callback(servicesInfo);
 };
 
 module.exports = DockerManager;
