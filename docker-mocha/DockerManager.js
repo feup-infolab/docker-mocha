@@ -1,5 +1,4 @@
 const childProcess = require("child_process");
-const yaml = require("js-yaml");
 const async = require("async");
 const fs = require("fs");
 
@@ -7,10 +6,15 @@ const DockerManager = function ()
 {
 };
 
-
-DockerManager.checkpointExists = function(checkpointName, composeFile, callback)
+/**
+ * DONE
+ * @param test
+ * @param dockerMocha
+ * @param callback
+ */
+DockerManager.checkIfStateExists = function(test, dockerMocha, callback)
 {
-    DockerManager.getAllServicesInOrchestra(composeFile,(services) =>
+    DockerManager.getAllServicesInOrchestra(dockerMocha,(services) =>
     {
         if(services === null)
             callback(null);
@@ -19,7 +23,7 @@ DockerManager.checkpointExists = function(checkpointName, composeFile, callback)
             async.mapSeries(services,
                 (service, callback) =>
                 {
-                    childProcess.exec(`docker image inspect "${service.image}:${checkpointName}"`,
+                    childProcess.exec(`docker image inspect "${service.image}:${test.name}"`,
                         (err, result) =>
                         {
                             if(!err && result)
@@ -48,42 +52,21 @@ DockerManager.checkpointExists = function(checkpointName, composeFile, callback)
     });
 };
 
-DockerManager.getAllServicesInOrchestra = function(composeFile, callback)
+/**
+ * DONE
+ * @param dockerMocha
+ * @param callback
+ */
+DockerManager.getAllServicesInOrchestra = function(dockerMocha, callback)
 {
-    let dockerCompose;
 
-    if(composeFile === null)
-    {
-        try
-        {
-            dockerCompose = yaml.safeLoad(fs.readFileSync("docker-compose.yml"));
-        }
-        catch (e)
-        {
-            callback(null);
-            return;
-        }
-    }
-    else
-    {
-        try
-        {
-            dockerCompose = yaml.safeLoad(fs.readFileSync(composeFile));
-        }
-        catch (e)
-        {
-            callback(null);
-            return;
-        }
-    }
-
-    const services = Object.keys(dockerCompose.services);
+    const services = Object.keys(dockerMocha.composeContents.services);
     let servicesInfo = [];
 
     for(let i in services)
     {
         let service = services[i];
-        let container = dockerCompose.services[service];
+        let container = dockerMocha.composeContents.services[service];
 
         servicesInfo.push({
             service: service,
@@ -95,5 +78,86 @@ DockerManager.getAllServicesInOrchestra = function(composeFile, callback)
 
     callback(servicesInfo);
 };
+
+/**
+ * DONE
+ * @param test
+ * @param dockerMocha
+ * @param callback
+ */
+DockerManager.restoreState = function(test, dockerMocha, callback)
+{
+    DockerManager.checkIfStateExists(test, dockerMocha, (exists) =>
+    {
+        if(!exists)
+        {
+            DockerManager.createState(test, dockerMocha, () =>
+            {
+                DockerManager.startState(test, dockerMocha, (containerInfo) =>
+                {
+                    callback(containerInfo);
+                })
+            })
+        }
+        else
+        {
+            DockerManager.startState(test, dockerMocha, (containerInfo) =>
+            {
+                callback(containerInfo);
+            })
+        }
+    })
+};
+
+/**
+ * TODO
+ * @param test
+ * @param dockerMocha
+ * @param callback
+ */
+DockerManager.createState = function(test, dockerMocha, callback)
+{
+
+};
+
+
+/**
+ * TODO
+ * @param test
+ * @param dockerMocha
+ * @param calback
+ */
+DockerManager.startState = function(test, dockerMocha, callback)
+{
+    callback(null);
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 module.exports = DockerManager;

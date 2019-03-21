@@ -2,6 +2,7 @@ const DockerMocha = require("./DockerMocha");
 const DockerManager = require("./DockerManager");
 const path = require("path");
 const fs = require("fs");
+const yaml = require("js-yaml");
 
 const defaultFileName = "tests.json";
 const defaultFile = path.join(process.cwd(), defaultFileName);
@@ -98,8 +99,42 @@ else
     else
     {
         fileToUse = overrideFile;
-        console.warn("WARN: Using override file");
+        console.info("INFO: Using override file: " + overrideFile);
     }
+
+    //Loading compose File
+    if(composeFile === null)
+    {
+        try
+        {
+            let composeContents = yaml.safeLoad(fs.readFileSync("docker-compose.yml"));
+            composeFile = path.join(process.cwd(), "docker-compose.yml");
+            dockerMocha.addComposeFile(composeFile, composeContents);
+            console.info("INFO: Using default docker-compose.yml");
+        }
+        catch (e)
+        {
+            console.error("ERROR: No default docker-compose.yml");
+            process.exit(1);
+        }
+    }
+    else
+    {
+        try
+        {
+            let composeContents = yaml.safeLoad(fs.readFileSync(composeFile));
+            dockerMocha.addComposeFile(composeFile, composeContents);
+            console.info("INFO: Using specified compose file: " + composeFile);
+        }
+        catch (e)
+        {
+            console.error("ERROR: Could not load file: " + composeFile);
+            process.exit(1);
+        }
+    }
+
+    //Informing threads number
+    console.info("INFO: Using " + threadsNumber + " thread(s)");
 
     //Parsing tests from *.json tests file
     const tests = JSON.parse(fs.readFileSync(fileToUse, 'utf8'));
@@ -107,7 +142,7 @@ else
     //For each test verify if the test file and setup file exist. Add to docker mocha if positive
     for(let i in tests)
     {
-        let file = path.join(path.dirname(fileToUse), tests[i].file);
+        let file = path.join(path.dirname(fileToUse), tests[i].test);
         file = path.relative(process.cwd(), file);
 
         let setup;
@@ -144,13 +179,13 @@ else
         //check if test name aleady exists
         for(let j in dockerMocha.testList)
         {
-            if(dockerMocha.testList[j].title === tests[i].title)
+            if(dockerMocha.testList[j].name === tests[i].name)
                 repeated = true;
         }
 
-        if(tests[i].title && fileExists && setupExists && !repeated)
+        if(tests[i].name && fileExists && setupExists && !repeated)
         {
-            tests[i].file = file;
+            tests[i].test = file;
             tests[i].setup = setup;
             dockerMocha.addTest(tests[i]);
         }
@@ -192,32 +227,10 @@ function manager()
 
 function runTest(test, callback)
 {
-    /**
-     * check if setup exists
-     *  create if not
-     * restore if not
-     *
-     * run the test
-     */
-
-    DockerManager.checkpointExists(test.title, composeFile,(exists) =>
+    DockerManager.checkIfStateExists(test, dockerMocha, (exists) =>
     {
-        if(exists === null)
-        {
-            console.error("Failed to verify if checkpoint exists");
-            callback();
-        }
-        else
-        {
-            if(!exists)
-            {
-                //create checkpoint
-                //restore state
-            }
+        console.log(exists);
+        callback();
+    })
 
-
-            callback();
-        }
-
-    });
 }

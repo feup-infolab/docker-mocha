@@ -1,7 +1,7 @@
 [
-  {"title": "defaultTag", "file": "./init.js", "setup": null},
-  {"title": "setDollar", "file": "./dollar/setDollar.js", "setup": "./init.js"},
-  {"title": "testDollar", "file": "./dollar/testDollar.js", "setup": "./dollar/setDollar.js"},
-  {"title": "SetPound", "file": "./pound/setPound.js", "setup": "./init.js"},
-  {"title": "testPound", "file": "./pound/testPound.js", "setup": "./pound/setPound.js"}
+  {"name": "init",       "parent": null,       "test": "./init.js",              "setup": null,                    "init": null},
+  {"name": "setDollar",  "parent": "init",     "test": "./dollar/setDollar.js",  "setup": "./init.js",             "init": null},
+  {"name": "testDollar", "parent": "setDollar","test": "./dollar/testDollar.js", "setup": "./dollar/setDollar.js", "init": null},
+  {"name": "setPound",   "parent": "init",     "test": "./pound/setPound.js",    "setup": "./init.js",             "init": null},
+  {"name": "testPound",  "parent": "setPound", "test": "./pound/testPound.js",   "setup": "./pound/setPound.js",   "init": null}
 ]

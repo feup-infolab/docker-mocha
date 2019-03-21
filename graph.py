@@ -17,7 +17,7 @@ data = json.load(open(sys.argv[1]))
 G = nx.DiGraph()
 
 for test in data:
-    fileExists = os.path.exists(os.path.join(os.path.dirname(sys.argv[1]), test["file"]))
+    fileExists = os.path.exists(os.path.join(os.path.dirname(sys.argv[1]), test["test"]))
     setupExists = False
 
     if test["setup"] == None:
@@ -26,7 +26,7 @@ for test in data:
         setupExists = os.path.exists(os.path.join(os.path.dirname(sys.argv[1]), test["setup"]))
 
     if  fileExists and setupExists:
-        G.add_edge(test["file"], test["setup"])
+        G.add_edge(test["name"], test["parent"])
 
 nx.draw(G, with_labels=True)
 
