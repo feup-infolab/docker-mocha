@@ -117,7 +117,36 @@ DockerManager.restoreState = function(test, dockerMocha, callback)
  */
 DockerManager.createState = function(test, dockerMocha, callback)
 {
+    const parent = dockerMocha.getParent(test);
 
+    //vanilla state
+    if(parent === null)
+    {
+        //TODO
+    }
+    else
+    {
+        DockerManager.checkIfStateExists(parent, dockerMocha, (exists) =>
+        {
+            if(!exists)
+            {
+                DockerManager.createState(parent, dockerMocha, () =>
+                {
+                    DockerManager.startState(parent, dockerMocha, (info) =>
+                    {
+                        //TODO
+                         callback();
+                    })
+                })
+            }
+            else
+            {
+
+
+
+            }
+        })
+    }
 };
 
 
@@ -125,9 +154,14 @@ DockerManager.createState = function(test, dockerMocha, callback)
  * TODO
  * @param test
  * @param dockerMocha
- * @param calback
+ * @param callback
  */
 DockerManager.startState = function(test, dockerMocha, callback)
+{
+    callback(null);
+};
+
+DockerManager.runCommand = function(container, cmd, callback)
 {
     callback(null);
 };

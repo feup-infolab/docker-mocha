@@ -5,6 +5,7 @@ class DockerMocha
         this.testList = [];
         this.composeContents = [];
         this.composeFile = null;
+        this.entrypoint = null;
     }
 
     addTest(test)
@@ -24,6 +25,22 @@ class DockerMocha
         this.composeContents = composeContents;
     }
 
+    getParent(test)
+    {
+        const parent = test.parent;
+
+        if(parent === null)
+            return null;
+
+        for(let i in this.testList)
+        {
+            if(this.testList[i].title === parent)
+            {
+                return this.testList[i];
+            }
+        }
+    }
+
     print()
     {
         for(let i in this.testList)
@@ -37,6 +54,7 @@ class DockerMocha
                 "; Init: " + test.init);
         }
 
+        //console.log("Entrypoint: " + this.entrypoint);
         //console.log(this.composeFile);
         //console.log(this.composeContents);
     }

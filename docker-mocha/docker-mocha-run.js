@@ -8,6 +8,7 @@ const defaultFileName = "tests.json";
 const defaultFile = path.join(process.cwd(), defaultFileName);
 let overrideFile = null;
 let composeFile = null;
+let entrypoint = null;
 
 const TIMEOUT = 100;
 
@@ -47,6 +48,15 @@ for(let i in process.argv)
         if((Number(i) + 1) < process.argv.length)
         {
             composeFile = path.join(process.cwd(), process.argv[Number(i) + 1]);
+        }
+    }
+
+    //Check if test entrypoint specified
+    if(process.argv[i] === "-e" || process[i] === "--entrypoint")
+    {
+        if((Number(i) + 1) < process.argv.length)
+        {
+            entrypoint = process.argv[Number(i) + 1];
         }
     }
 }
@@ -132,6 +142,22 @@ else
             process.exit(1);
         }
     }
+
+    if(entrypoint === null)
+    {
+        try
+        {
+            const packageJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package.json"), 'utf8'));
+            entrypoint = packageJson.name;
+            dockerMocha.entrypoint = entrypoint;
+        }
+        catch (e) {
+            console.error("ERROR: Unable to retrieve entrypoint service, please provide a package json or specify with -e flag");
+            process.exit(1);
+        }
+    }
+    else
+        dockerMocha.entrypoint = entrypoint;
 
     //Informing threads number
     console.info("INFO: Using " + threadsNumber + " thread(s)");
