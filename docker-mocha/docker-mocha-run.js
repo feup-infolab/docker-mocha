@@ -253,10 +253,13 @@ function manager()
 
 function runTest(test, callback)
 {
+    /**
     DockerManager.checkIfStateExists(test, dockerMocha, (exists) =>
     {
         console.log(exists);
         callback();
     })
+    */
 
+    callback();
 }

@@ -2,12 +2,10 @@ const childProcess = require("child_process");
 const async = require("async");
 const fs = require("fs");
 
-const DockerManager = function ()
-{
-};
+const DockerManager = function () {};
 
 /**
- * DONE
+ * Verifies the existence of a given state. Returns true or false accordingly.
  * @param test
  * @param dockerMocha
  * @param callback
@@ -53,7 +51,7 @@ DockerManager.checkIfStateExists = function(test, dockerMocha, callback)
 };
 
 /**
- * DONE
+ * Gets information about services for the corresponding orchestra
  * @param dockerMocha
  * @param callback
  */
@@ -80,7 +78,7 @@ DockerManager.getAllServicesInOrchestra = function(dockerMocha, callback)
 };
 
 /**
- * DONE
+ * Restores a state, returning the info of the restored state. It is responsible for creating states if they do not exist
  * @param test
  * @param dockerMocha
  * @param callback
@@ -93,17 +91,17 @@ DockerManager.restoreState = function(test, dockerMocha, callback)
         {
             DockerManager.createState(test, dockerMocha, () =>
             {
-                DockerManager.startState(test, dockerMocha, (containerInfo) =>
+                DockerManager.startState(test, dockerMocha, (info) =>
                 {
-                    callback(containerInfo);
+                    callback(info);
                 })
             })
         }
         else
         {
-            DockerManager.startState(test, dockerMocha, (containerInfo) =>
+            DockerManager.startState(test, dockerMocha, (info) =>
             {
-                callback(containerInfo);
+                callback(info);
             })
         }
     })
@@ -141,17 +139,19 @@ DockerManager.createState = function(test, dockerMocha, callback)
             }
             else
             {
-
-
-
+                DockerManager.startState(parent, dockerMocha, (info) =>
+                {
+                    //TODO
+                })
             }
         })
     }
 };
 
 
+
 /**
- * TODO
+ * TODO ALL
  * @param test
  * @param dockerMocha
  * @param callback
@@ -161,9 +161,66 @@ DockerManager.startState = function(test, dockerMocha, callback)
     callback(null);
 };
 
-DockerManager.runCommand = function(container, cmd, callback)
+DockerManager.saveState = function(test, dockerMocha, callback)
 {
     callback(null);
+};
+
+DockerManager.stopState = function(test, dockerMocha, callback)
+{
+    callback(null);
+};
+
+
+
+/**
+ * ===============================
+ * Container Interaction functions
+ * ===============================
+ */
+DockerManager.runSetup = function(container, test, callback)
+{
+    DockerManager.runCommand(container, `node ${test.setup}`, (err, result) =>
+    {
+        callback();
+    })
+};
+
+DockerManager.runInit = function(container, test, callback)
+{
+    DockerManager.runCommand(container, `node ${test.init}`, (err, result) =>
+    {
+        callback();
+    })
+};
+
+DockerManager.runTest = function(container, test, callback)
+{
+    DockerManager.runCommand(container, `mocha ${test.test}`, (err, result) =>
+    {
+        callback(err);
+    })
+};
+
+
+
+/**
+ * Runs a command (cmd) in a specific (container), callback invoked when it finishes, returns success of failure and
+ * the result
+ * @param container
+ * @param cmd
+ * @param callback
+ */
+DockerManager.runCommand = function(container, cmd, callback)
+{
+    childProcess.exec(`docker exec ${container} ${cmd}`,
+        (err, result) =>
+        {
+            if(err === null)
+                callback(0, result);
+            else
+                callback(err.code, result);
+        })
 };
 
 
