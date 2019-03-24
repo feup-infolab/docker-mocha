@@ -255,12 +255,15 @@ function runTest(test, callback)
 {
     DockerManager.restoreState(test, dockerMocha, (info) =>
     {
-        DockerManager.runTest(info.entrypoint, test, (err) =>
+        DockerManager.runInits(info.entrypoint, test, dockerMocha, () =>
         {
-            if(err > 0)
-                console.error("Test Failed: " + test.name);
+            DockerManager.runTest(info.entrypoint, test, (err) =>
+            {
+                if(err > 0)
+                    console.error("Test Failed: " + test.name);
 
-            callback();
+                callback();
+            })
         })
     })
 }

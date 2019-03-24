@@ -41,6 +41,25 @@ class DockerMocha
         }
     }
 
+    getHierarchy(test)
+    {
+        if(test === null)
+            return null;
+
+        let hierarchy = [];
+        hierarchy.push(test);
+
+        let parent = this.getParent(test);
+
+        while(parent !== null)
+        {
+            hierarchy.push(parent);
+            parent = this.getParent(parent);
+        }
+
+        return hierarchy;
+    }
+
     print()
     {
         for(let i in this.testList)

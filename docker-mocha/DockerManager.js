@@ -122,7 +122,9 @@ DockerManager.createState = function(test, dockerMocha, callback)
 
 
 /**
- * TODO ALL
+ * ======================
+ * State Handle Functions
+ * ======================
  * @param test
  * @param dockerMocha
  * @param callback
@@ -238,6 +240,24 @@ DockerManager.runInit = function(container, test, callback)
     })
 };
 
+DockerManager.runInits = function(container, test, dockerMocha, callback)
+{
+    const hierarchy = dockerMocha.getHierarchy(test);
+
+    async.mapSeries(hierarchy,
+        (hierarchyTest, callback) =>
+        {
+            DockerManager.runInit(container, hierarchyTest, () =>
+            {
+                callback();
+            })
+        },
+        (err, results)=>
+        {
+            callback();
+        });
+};
+
 DockerManager.runTest = function(container, test, callback)
 {
     DockerManager.runCommand(container, `mocha ${test.test}`, (err, result) =>
@@ -245,6 +265,8 @@ DockerManager.runTest = function(container, test, callback)
         callback(err);
     })
 };
+
+
 
 
 
