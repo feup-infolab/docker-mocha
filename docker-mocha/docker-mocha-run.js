@@ -253,13 +253,14 @@ function manager()
 
 function runTest(test, callback)
 {
-    /**
-    DockerManager.checkIfStateExists(test, dockerMocha, (exists) =>
+    DockerManager.restoreState(test, dockerMocha, (info) =>
     {
-        console.log(exists);
-        callback();
-    })
-    */
+        DockerManager.runTest(info.entrypoint, test, (err) =>
+        {
+            if(err > 0)
+                console.error("Test Failed: " + test.name);
 
-    callback();
+            callback();
+        })
+    })
 }

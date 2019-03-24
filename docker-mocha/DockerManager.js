@@ -5,52 +5,6 @@ const fs = require("fs");
 const DockerManager = function () {};
 
 /**
- * Verifies the existence of a given state. Returns true or false accordingly.
- * @param test
- * @param dockerMocha
- * @param callback
- */
-DockerManager.checkIfStateExists = function(test, dockerMocha, callback)
-{
-    DockerManager.getAllServicesInOrchestra(dockerMocha,(services) =>
-    {
-        if(services === null)
-            callback(null);
-        else
-        {
-            async.mapSeries(services,
-                (service, callback) =>
-                {
-                    childProcess.exec(`docker image inspect "${service.image}:${test.name}"`,
-                        (err, result) =>
-                        {
-                            if(!err && result)
-                            {
-                                callback(null, true)
-                            }
-                            else
-                            {
-                                callback(null, false);
-                            }
-                        })
-                },
-                (err, results)=>
-                {
-                    for(let i in results)
-                    {
-                        if (results[i] === false)
-                        {
-                            callback(false);
-                            return;
-                        }
-                    }
-                    callback(true);
-                });
-        }
-    });
-};
-
-/**
  * Gets information about services for the corresponding orchestra
  * @param dockerMocha
  * @param callback
@@ -132,8 +86,16 @@ DockerManager.createState = function(test, dockerMocha, callback)
                 {
                     DockerManager.startState(parent, dockerMocha, (info) =>
                     {
-                        //TODO
-                         callback();
+                        DockerManager.runSetup(info.entrypoint, test, () =>
+                        {
+                            DockerManager.saveState(parent, dockerMocha, () =>
+                            {
+                                DockerManager.stopState(parent, dockerMocha, () =>
+                                {
+                                    callback();
+                                })
+                            })
+                        })
                     })
                 })
             }
@@ -141,7 +103,16 @@ DockerManager.createState = function(test, dockerMocha, callback)
             {
                 DockerManager.startState(parent, dockerMocha, (info) =>
                 {
-                    //TODO
+                    DockerManager.runSetup(info.entrypoint, test, () =>
+                    {
+                        DockerManager.saveState(parent, dockerMocha, () =>
+                        {
+                            DockerManager.stopState(parent, dockerMocha, () =>
+                            {
+                                callback();
+                            })
+                        })
+                    })
                 })
             }
         })
@@ -158,17 +129,90 @@ DockerManager.createState = function(test, dockerMocha, callback)
  */
 DockerManager.startState = function(test, dockerMocha, callback)
 {
-    callback(null);
+    childProcess.exec(`export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} up -d`,
+        (err, result) =>
+        {
+            let info = {};
+            info.entrypoint = test.name + '.' + dockerMocha.entrypoint;
+
+            callback(info);
+        })
 };
 
 DockerManager.saveState = function(test, dockerMocha, callback)
 {
-    callback(null);
+    DockerManager.getAllServicesInOrchestra(dockerMocha,(services) =>
+    {
+        async.mapSeries(services,
+            (service, callback) =>
+            {
+                childProcess.exec(`docker commit ${test.name}.${service.name} ${service.image}:${test.name}`,
+                    (err, result) =>
+                    {
+                        callback();
+                    })
+            },
+            (err, results)=>
+            {
+                callback();
+            });
+
+    })
 };
 
 DockerManager.stopState = function(test, dockerMocha, callback)
 {
-    callback(null);
+    childProcess.exec(`export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} down`,
+        (err, result) =>
+        {
+            callback();
+        })
+};
+
+/**
+ * Verifies the existence of a given state. Returns true or false accordingly.
+ * @param test
+ * @param dockerMocha
+ * @param callback
+ */
+DockerManager.checkIfStateExists = function(test, dockerMocha, callback)
+{
+    DockerManager.getAllServicesInOrchestra(dockerMocha,(services) =>
+    {
+        if(services === null)
+            callback(null);
+        else
+        {
+            async.mapSeries(services,
+                (service, callback) =>
+                {
+                    childProcess.exec(`docker image inspect "${service.image}:${test.name}"`,
+                        (err, result) =>
+                        {
+                            if(!err && result)
+                            {
+                                callback(null, true)
+                            }
+                            else
+                            {
+                                callback(null, false);
+                            }
+                        })
+                },
+                (err, results)=>
+                {
+                    for(let i in results)
+                    {
+                        if (results[i] === false)
+                        {
+                            callback(false);
+                            return;
+                        }
+                    }
+                    callback(true);
+                });
+        }
+    });
 };
 
 
