@@ -69,12 +69,30 @@ DockerManager.restoreState = function(test, dockerMocha, callback)
  */
 DockerManager.createState = function(test, dockerMocha, callback)
 {
-    const parent = dockerMocha.getParent(test);
+    let parent = dockerMocha.getParent(test);
 
     //vanilla state
     if(parent === null)
     {
-        //TODO
+        parent = {};
+        parent.name = "vanilla";
+
+        DockerManager.startState(parent, dockerMocha, (info) =>
+        {
+            DockerManager.saveState(parent, parent, dockerMocha, () =>
+            {
+                DockerManager.runSetup(info.entrypoint, test, () =>
+                {
+                    DockerManager.saveState(test, parent, dockerMocha, () =>
+                    {
+                        DockerManager.stopState(parent, dockerMocha, () =>
+                        {
+                            callback();
+                        })
+                    })
+                })
+            })
+        })
     }
     else
     {
@@ -88,7 +106,7 @@ DockerManager.createState = function(test, dockerMocha, callback)
                     {
                         DockerManager.runSetup(info.entrypoint, test, () =>
                         {
-                            DockerManager.saveState(parent, dockerMocha, () =>
+                            DockerManager.saveState(test, parent, dockerMocha, () =>
                             {
                                 DockerManager.stopState(parent, dockerMocha, () =>
                                 {
@@ -105,7 +123,7 @@ DockerManager.createState = function(test, dockerMocha, callback)
                 {
                     DockerManager.runSetup(info.entrypoint, test, () =>
                     {
-                        DockerManager.saveState(parent, dockerMocha, () =>
+                        DockerManager.saveState(test, parent, dockerMocha, () =>
                         {
                             DockerManager.stopState(parent, dockerMocha, () =>
                             {
@@ -140,15 +158,21 @@ DockerManager.startState = function(test, dockerMocha, callback)
             callback(info);
         })
 };
-
-DockerManager.saveState = function(test, dockerMocha, callback)
+/**
+ *
+ * @param test, the name of the new state
+ * @param parent, the running containers name
+ * @param dockerMocha
+ * @param callback
+ */
+DockerManager.saveState = function(test, parent, dockerMocha, callback)
 {
     DockerManager.getAllServicesInOrchestra(dockerMocha,(services) =>
     {
         async.mapSeries(services,
             (service, callback) =>
             {
-                childProcess.exec(`docker commit ${test.name}.${service.name} ${service.image}:${test.name}`,
+                childProcess.exec(`docker commit ${parent.name}.${service.name} ${service.image}:${test.name}`,
                     (err, result) =>
                     {
                         callback();
@@ -267,9 +291,6 @@ DockerManager.runTest = function(container, test, callback)
 };
 
 
-
-
-
 /**
  * Runs a command (cmd) in a specific (container), callback invoked when it finishes, returns success of failure and
  * the result
@@ -288,33 +309,6 @@ DockerManager.runCommand = function(container, cmd, callback)
                 callback(err.code, result);
         })
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 module.exports = DockerManager;
