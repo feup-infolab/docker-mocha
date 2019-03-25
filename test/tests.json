@@ -1,5 +1,5 @@
 [
-  {"name": "init",       "parent": null,       "test": "./init.js",              "setup": null,                    "init": null},
+  {"name": "init",       "parent": null,       "test": "./init.js",              "setup": null,                    "init": "./init/init.js"},
   {"name": "setDollar",  "parent": "init",     "test": "./dollar/setDollar.js",  "setup": "./init.js",             "init": null},
   {"name": "testDollar", "parent": "setDollar","test": "./dollar/testDollar.js", "setup": "./dollar/setDollar.js", "init": null},
   {"name": "setPound",   "parent": "init",     "test": "./pound/setPound.js",    "setup": "./init.js",             "init": null},

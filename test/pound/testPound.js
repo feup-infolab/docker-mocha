@@ -1,6 +1,5 @@
 const assert = require('assert');
 const request = require('request');
-const setPound = require("../pound/setPound");
 const port = 3000;
 
 const pound = 0.86;
@@ -14,7 +13,6 @@ describe('Testing get Pound', function()
 
     it('should give error code 0 and return converted value', (done) =>
     {
-
         request('http://localhost:' + port + '/get/pound?euro=' + euro, {json:true}, (err, res, body) =>
         {
             assert.equal(200, res.statusCode);
@@ -24,22 +22,3 @@ describe('Testing get Pound', function()
         })
     }, pound);
 });
-
-
-
-/**
- * Not used for now
- */
-
-/*
- exports.setup = (done) =>
- {
-    setPound.setup(() =>
-    {
-        request('http://localhost:' + port + '/add/pound?value=' + pound, {json:true}, (err, res, body) =>
-        {
-            done();
-        })
-    });
-};
-*/

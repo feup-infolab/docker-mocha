@@ -1,6 +1,5 @@
 const assert = require('assert');
 const request = require('request');
-const setDollar = require("../dollar/setDollar");
 const port = 3000;
 
 const dollar = 1.13;
@@ -14,7 +13,6 @@ describe('Testing get Dollar', function()
 
     it('should give error code 0 and return converted value', (done) =>
     {
-
         request('http://localhost:' + port + '/get/dollar?euro=' + euro, {json:true}, (err, res, body) =>
         {
             assert.equal(200, res.statusCode);
@@ -25,22 +23,3 @@ describe('Testing get Dollar', function()
 
     })
 });
-
-
-
-/**
- * Not used for now
- */
-
-/*
-exports.setup = (done) =>
-{
-    setDollar.setup(() =>
-    {
-        request('http://localhost:' + port + '/add/dollar?value=' + dollar, {json:true}, (err, res, body) =>
-        {
-            done();
-        })
-    });
-};
-*/

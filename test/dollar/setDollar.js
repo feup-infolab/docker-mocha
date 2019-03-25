@@ -1,8 +1,6 @@
 const assert = require('assert');
 const request = require('request');
-const init = require("../init");
 const port = 3000;
-
 
 const dollar = 1.13;
 
@@ -20,19 +18,5 @@ describe('Testing set Dollar', function()
         })
     })
 });
-
-exports.setup = (done, dollarVal) =>
-{
-    if(dollarVal === null)
-        dollarVal = dollar;
-
-    init.setup(() =>
-    {
-        request('http://localhost:' + port + '/add/dollar?value=' + dollarVal, {json:true}, (err, res, body) =>
-        {
-            done();
-        })
-    });
-};
 
 

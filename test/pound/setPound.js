@@ -1,6 +1,5 @@
 const assert = require('assert');
 const request = require('request');
-const init = require("../init");
 const port = 3000;
 
 const pound = 0.86;
@@ -21,17 +20,3 @@ describe('Testing set Pound', function()
         })
     })
 });
-
-exports.setup = (done, poundVal) =>
-{
-    if(poundVal === null)
-        poundVal = pound;
-
-    init.setup(() =>
-    {
-        request('http://localhost:' + port + '/add/pound?value=' + poundVal, {json:true}, (err, res, body) =>
-        {
-            done();
-        })
-    });
-};

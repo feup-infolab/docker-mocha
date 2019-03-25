@@ -1,18 +1,6 @@
 const assert = require('assert');
 const request = require('request');
-const expressServer = require('../src/index');
 const port = 3000;
-
-beforeEach(() =>
-{
-    expressServer.start(null, port);
-});
-
-afterEach(() =>
-{
-    expressServer.stop();
-});
-
 
 describe('Testing server requests', function()
 {
@@ -48,10 +36,4 @@ describe('Testing server requests', function()
     });
 });
 
-exports.setup = (done) =>
-{
-    request('http://localhost:' + port, {json:true}, (err, res, body) =>
-    {
-        done();
-    })
-};
+
