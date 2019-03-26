@@ -2,6 +2,7 @@ class DockerMocha
 {
     constructor()
     {
+        this.testHierarch = [];
         this.testList = [];
         this.composeContents = [];
         this.composeFile = null;
@@ -12,6 +13,7 @@ class DockerMocha
     {
         if(test.name && test.test)
         {
+            this.testHierarch.push({name: test.name, parent: test.parent, test: test.test, setup: test.setup, init: test.init});
             this.testList.push({name: test.name, parent: test.parent, test: test.test, setup: test.setup, init: test.init});
             return true;
         }
@@ -32,11 +34,11 @@ class DockerMocha
         if(parent === null)
             return null;
 
-        for(let i in this.testList)
+        for(let i in this.testHierarch)
         {
-            if(this.testList[i].title === parent)
+            if(this.testHierarch[i].name === parent)
             {
-                return this.testList[i];
+                return this.testHierarch[i];
             }
         }
     }

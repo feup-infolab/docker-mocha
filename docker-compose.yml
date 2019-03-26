@@ -11,16 +11,6 @@ services:
       custom_net:
         aliases:
           - dendro
-  mongo:
-    container_name: ${TEST_NAME}.mongo
-    image: nuno/node-currency:${TEST_NAME}
-    build:
-      context: .
-      dockerfile: Dockerfile
-    networks:
-      custom_net:
-        aliases:
-          - mongo
 networks:
   custom_net:
     name: ${TEST_NAME}

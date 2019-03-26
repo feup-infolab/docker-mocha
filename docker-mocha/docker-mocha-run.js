@@ -168,16 +168,14 @@ else
     //For each test verify if the test file and setup file exist. Add to docker mocha if positive
     for(let i in tests)
     {
-        let file = path.join(path.dirname(fileToUse), tests[i].test);
-        file = path.relative(process.cwd(), file);
+        let file = path.join(process.cwd(), tests[i].test);
 
         let setup;
 
         if(tests[i].setup === null)
             setup = null;
         else {
-            setup = path.join(path.dirname(fileToUse), tests[i].setup);
-            setup = path.relative(process.cwd(), setup);
+            setup = path.join(process.cwd(), tests[i].setup);
         }
 
         let fileExists = false;
@@ -211,8 +209,6 @@ else
 
         if(tests[i].name && fileExists && setupExists && !repeated)
         {
-            tests[i].test = file;
-            tests[i].setup = setup;
             dockerMocha.addTest(tests[i]);
         }
         else
@@ -222,7 +218,26 @@ else
     console.log("\nAdded the following tests: ");
     dockerMocha.print();
 
-    manager();
+    //Remove all images and start manager
+    /*
+    DockerManager.deleteAllStates(dockerMocha, () =>
+    {
+        manager();
+    });
+    */
+
+
+    /**
+     * TEmp
+     */
+
+    DockerManager.deleteAllStates(dockerMocha, () =>
+    {
+        runTest(null, () => {})
+    });
+
+
+
 }
 
 function manager()
@@ -253,17 +268,31 @@ function manager()
 
 function runTest(test, callback)
 {
+    test = {"name": "init",       "parent": null,       "test": "test/init.js",              "setup": "./setup/init.js",                        "init": null};
+
+    console.log("\nRunning test: " + test.name);
+
+
     DockerManager.restoreState(test, dockerMocha, (info) =>
     {
         DockerManager.runInits(info.entrypoint, test, dockerMocha, () =>
         {
-            DockerManager.runTest(info.entrypoint, test, (err) =>
+            DockerManager.runTest(info.entrypoint, test, (err, result) =>
             {
                 if(err > 0)
                     console.error("Test Failed: " + test.name);
+                else
+                    console.info("Test Passed: " + test.name);
 
-                callback();
+                console.log(result);
+
+                DockerManager.stopState(test, dockerMocha, () =>
+                {
+                    callback();
+                });
             })
         })
     })
+
+
 }

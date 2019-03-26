@@ -3,7 +3,7 @@ const port = 3000;
 
 function setup()
 {
-    request('http://localhost:' + port, {json:true}, (err, res, body) =>
+    request('http://localhost:' + port + '/init', {json:true}, (err, res, body) =>
     {
         console.log(body);
     })
