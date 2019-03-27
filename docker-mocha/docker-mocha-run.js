@@ -218,26 +218,27 @@ else
     console.log("\nAdded the following tests: ");
     dockerMocha.print();
 
+    //Initialize DockerManager
+    DockerManager(1000);
+
     //Remove all images and start manager
-    /*
+
     DockerManager.deleteAllStates(dockerMocha, () =>
     {
         manager();
     });
-    */
 
 
     /**
      * TEmp
      */
-
+    /*
+    console.log("\n");
     DockerManager.deleteAllStates(dockerMocha, () =>
     {
-        runTest(null, () => {})
+        runTest( {"name": "init","parent": null,"test": "test/init.js","setup": "setup/init.js","init": null}, () => {})
     });
-
-
-
+    */
 }
 
 function manager()
@@ -268,10 +269,6 @@ function manager()
 
 function runTest(test, callback)
 {
-    test = {"name": "init",       "parent": null,       "test": "test/init.js",              "setup": "./setup/init.js",                        "init": null};
-
-    console.log("\nRunning test: " + test.name);
-
 
     DockerManager.restoreState(test, dockerMocha, (info) =>
     {

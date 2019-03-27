@@ -1,8 +1,11 @@
 const childProcess = require("child_process");
 const async = require("async");
-const fs = require("fs");
+let timeout = 100;
 
-const DockerManager = function () {};
+const DockerManager = function (OverrideTime)
+{
+    timeout = OverrideTime;
+};
 
 /**
  * Gets information about services for the corresponding orchestra
@@ -21,7 +24,7 @@ DockerManager.getAllServicesInOrchestra = function(dockerMocha, callback)
 
         servicesInfo.push({
             service: service,
-            name: container.container_name,
+            name: container.container_name.replace(/\${.*}\./g, ""),
             image: container.image.replace(/:\${.*}/g, "")
         });
 
@@ -32,25 +35,31 @@ DockerManager.getAllServicesInOrchestra = function(dockerMocha, callback)
 
 DockerManager.deleteAllStates = function(dockerMocha, callback)
 {
-    console.log("Deleting all states");
+    //console.log("Deleting all states");
 
-    DockerManager.getAllServicesInOrchestra(dockerMocha,(services) =>
+    function func()
     {
-        async.mapSeries(services,
-            (service, callback) =>
-            {
-                childProcess.exec(`docker images | grep ${service.image} | tr -s ' ' | cut -d ' ' -f 2 | xargs -I {} docker rmi ${service.image}:{}`,
-                    (err, result) =>
-                    {
-                        callback();
-                    })
-            },
-            (err, results)=>
-            {
-                callback();
-            });
+        DockerManager.getAllServicesInOrchestra(dockerMocha,(services) =>
+        {
+            async.mapSeries(services,
+                (service, callback) =>
+                {
+                    console.log(`docker images | grep ${service.image} | tr -s ' ' | cut -d ' ' -f 2 | xargs -I {} docker rmi ${service.image}:{}`);
 
-    })
+                    childProcess.exec(`docker images | grep ${service.image} | tr -s ' ' | cut -d ' ' -f 2 | xargs -I {} docker rmi ${service.image}:{}`,
+                        (err, result) =>
+                        {
+                            callback();
+                        })
+                },
+                (err, results)=>
+                {
+                    callback();
+                });
+        })
+    }
+
+    setTimeout(func, timeout);
 };
 
 /**
@@ -61,13 +70,13 @@ DockerManager.deleteAllStates = function(dockerMocha, callback)
  */
 DockerManager.restoreState = function(test, dockerMocha, callback)
 {
-    console.log("Restoring state: " + test.name);
+    //console.log("Restoring state: " + test.name);
 
     DockerManager.checkIfStateExists(test, dockerMocha, (exists) =>
     {
         if(!exists)
         {
-            console.log(test.name + " does not exist! creating....");
+            //console.log(test.name + " does not exist! creating....");
 
             DockerManager.createState(test, dockerMocha, () =>
             {
@@ -79,7 +88,7 @@ DockerManager.restoreState = function(test, dockerMocha, callback)
         }
         else
         {
-            console.log(test.name + "already exists|");
+            //console.log(test.name + "already exists|");
             DockerManager.startState(test, dockerMocha, (info) =>
             {
                 callback(info);
@@ -89,14 +98,14 @@ DockerManager.restoreState = function(test, dockerMocha, callback)
 };
 
 /**
- * TODO
+ * Creates the state
  * @param test
  * @param dockerMocha
  * @param callback
  */
 DockerManager.createState = function(test, dockerMocha, callback)
 {
-    console.log("Creating State: " + test.name);
+    //console.log("Creating State: " + test.name);
 
     let parent = dockerMocha.getParent(test);
 
@@ -108,24 +117,15 @@ DockerManager.createState = function(test, dockerMocha, callback)
 
         DockerManager.startState(parent, dockerMocha, (info) =>
         {
-            DockerManager.runSetup(info.entrypoint, test, (err, result) =>
+            DockerManager.runSetup(info.entrypoint, test, () =>
             {
-                console.log("Setup: ", err, result);
-
-                DockerManager.runCommand(info.entrypoint, 'node setup/init.js', (err, result) =>
+                DockerManager.saveState(test, parent, dockerMocha, () =>
                 {
-                    console.log(result);
-
-                    DockerManager.saveState(test, parent, dockerMocha, () =>
+                    DockerManager.stopState(parent, dockerMocha, () =>
                     {
-                        DockerManager.stopState(parent, dockerMocha, () =>
-                        {
-                            callback();
-                        })
+                        callback();
                     })
                 })
-
-
             })
         })
     }
@@ -141,8 +141,6 @@ DockerManager.createState = function(test, dockerMocha, callback)
                     {
                         DockerManager.runSetup(info.entrypoint, test, (err, result) =>
                         {
-                            console.log("Setup: ", err, result);
-
                             DockerManager.saveState(test, parent, dockerMocha, () =>
                             {
                                 DockerManager.stopState(parent, dockerMocha, () =>
@@ -160,8 +158,6 @@ DockerManager.createState = function(test, dockerMocha, callback)
                 {
                     DockerManager.runSetup(info.entrypoint, test, (err, result) =>
                     {
-                        console.log("Setup: ", err, result);
-
                         DockerManager.saveState(test, parent, dockerMocha, () =>
                         {
                             DockerManager.stopState(parent, dockerMocha, () =>
@@ -188,16 +184,23 @@ DockerManager.createState = function(test, dockerMocha, callback)
  */
 DockerManager.startState = function(test, dockerMocha, callback)
 {
-    console.log("Starting state: " + test.name);
+    //console.log("Starting state: " + test.name);
 
-    childProcess.exec(`export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} up -d`,
-        (err, result) =>
-        {
-            let info = {};
-            info.entrypoint = test.name + '.' + dockerMocha.entrypoint;
+    function func()
+    {
+        console.log(`export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} up -d`);
 
-            callback(info);
-        })
+        childProcess.exec(`export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} up -d`,
+            (err, result) =>
+            {
+                let info = {};
+                info.entrypoint = test.name + '.' + dockerMocha.entrypoint;
+
+                callback(info);
+            })
+    }
+
+    setTimeout(func, timeout)
 };
 /**
  *
@@ -208,36 +211,49 @@ DockerManager.startState = function(test, dockerMocha, callback)
  */
 DockerManager.saveState = function(test, parent, dockerMocha, callback)
 {
-    console.log("Saving state: " + test.name);
+    //console.log("Saving state: " + test.name);
 
-    DockerManager.getAllServicesInOrchestra(dockerMocha,(services) =>
+    function func()
     {
-        async.mapSeries(services,
-            (service, callback) =>
-            {
-                childProcess.exec(`docker commit ${parent.name}.${service.name} ${service.image}:${test.name}`,
-                    (err, result) =>
-                    {
-                        callback();
-                    })
-            },
-            (err, results)=>
-            {
-                callback();
-            });
+        DockerManager.getAllServicesInOrchestra(dockerMocha, (services) => {
+            async.mapSeries(services,
+                (service, callback) =>
+                {
+                    //console.log(JSON.stringify(parent));
+                    //console.log(JSON.stringify(service));
 
-    })
+                    console.log(`docker commit ${parent.name}.${service.name} ${service.image}:${test.name}`);
+
+                    childProcess.exec(`docker commit ${parent.name}.${service.name} ${service.image}:${test.name}`,
+                        (err, result) => {
+                            callback();
+                        })
+                },
+                (err, results) => {
+                    callback();
+                });
+        })
+    }
+
+    setTimeout(func, timeout)
 };
 
 DockerManager.stopState = function(test, dockerMocha, callback)
 {
-    console.log("Stopping state: " + test.name);
+    //console.log("Stopping state: " + test.name);
 
-    childProcess.exec(`export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} down`,
-        (err, result) =>
-        {
-            callback();
-        })
+    function func()
+    {
+        console.log(`export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} down`);
+
+        childProcess.exec(`export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} down`,
+            (err, result) =>
+            {
+                callback();
+            })
+    }
+
+    setTimeout(func, timeout);
 };
 
 /**
@@ -248,7 +264,7 @@ DockerManager.stopState = function(test, dockerMocha, callback)
  */
 DockerManager.checkIfStateExists = function(test, dockerMocha, callback)
 {
-    console.log("Checking if state exists: " + test.name);
+    //console.log("Checking if state exists: " + test.name);
 
     DockerManager.getAllServicesInOrchestra(dockerMocha,(services) =>
     {
@@ -259,6 +275,8 @@ DockerManager.checkIfStateExists = function(test, dockerMocha, callback)
             async.mapSeries(services,
                 (service, callback) =>
                 {
+                    console.log(`docker image inspect "${service.image}:${test.name}"`);
+
                     childProcess.exec(`docker image inspect "${service.image}:${test.name}"`,
                         (err, result) =>
                         {
@@ -297,27 +315,41 @@ DockerManager.checkIfStateExists = function(test, dockerMocha, callback)
  */
 DockerManager.runSetup = function(container, test, callback)
 {
-    console.log("Running setup: " + test.name, container, test.setup);
+    //console.log("Running setup in: " + container, `node ${test.setup}`);
 
-    DockerManager.runCommand(container, `node ${test.setup}`, (err, result) =>
+    function func()
     {
-        callback(err, result);
-    })
+        DockerManager.runCommand(container, `node ${test.setup}`, (err, result) =>
+        {
+            //console.log(err);
+            //console.log(result);
+            callback(err, result);
+        });
+    }
+
+    setTimeout(func, timeout);
+
+
 };
 
 DockerManager.runInit = function(container, test, callback)
 {
-    console.log("Running Init: " + test.name);
+    //console.log("Running Init: " + test.name);
 
-    DockerManager.runCommand(container, `node ${test.init}`, (err, result) =>
+    function func()
     {
-        callback();
-    })
+        DockerManager.runCommand(container, `node ${test.init}`, (err, result) =>
+        {
+            callback();
+        })
+    }
+
+    setTimeout(func, timeout);
 };
 
 DockerManager.runInits = function(container, test, dockerMocha, callback)
 {
-    console.log("Running all inits: " + test.name);
+    //console.log("Running all inits: " + test.name);
 
     const hierarchy = dockerMocha.getHierarchy(test);
 
@@ -337,12 +369,16 @@ DockerManager.runInits = function(container, test, dockerMocha, callback)
 
 DockerManager.runTest = function(container, test, callback)
 {
-    console.log("Running test: " + test.name, container, test.test);
+    //console.log("Running test: " + test.name, container, test.test);
 
-    DockerManager.runCommand(container, `./node_modules/mocha/bin/mocha  ${test.test}`, (err, result) =>
+    function func()
     {
-        callback(err, result);
-    })
+        DockerManager.runCommand(container, `./node_modules/mocha/bin/mocha  ${test.test}`, (err, result) => {
+            callback(err, result);
+        })
+    }
+
+    setTimeout(func, timeout);
 };
 
 
@@ -355,6 +391,8 @@ DockerManager.runTest = function(container, test, callback)
  */
 DockerManager.runCommand = function(container, cmd, callback)
 {
+    console.log(`docker exec ${container} ${cmd}`);
+
     childProcess.exec(`docker exec ${container} ${cmd}`,
         (err, result) =>
         {
