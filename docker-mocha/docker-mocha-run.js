@@ -21,6 +21,8 @@ let overrideExists = false;
 const dockerMocha = new DockerMocha();
 let running = 0;
 
+let passedTests = 0;
+let failedTests = 0;
 
 for(let i in process.argv)
 {
@@ -222,23 +224,10 @@ else
     DockerManager(1000);
 
     //Remove all images and start manager
-
     DockerManager.deleteAllStates(dockerMocha, () =>
     {
         manager();
     });
-
-
-    /**
-     * TEmp
-     */
-    /*
-    console.log("\n");
-    DockerManager.deleteAllStates(dockerMocha, () =>
-    {
-        runTest( {"name": "init","parent": null,"test": "test/init.js","setup": "setup/init.js","init": null}, () => {})
-    });
-    */
 }
 
 function manager()
@@ -250,8 +239,13 @@ function manager()
             let test = dockerMocha.testList[0];
             dockerMocha.testList.shift();
 
-            runTest(test, () =>
+            runTest(test, (err) =>
             {
+                if(err > 0)
+                    failedTests++;
+                else
+                    passedTests++;
+
                 running--;
             });
 
@@ -262,6 +256,7 @@ function manager()
     }
     else
     {
+        console.log("Docker Mocha finished with " + passedTests + "/" + (passedTests+failedTests) + " passed tests");
         process.exit(0);
     }
 }
@@ -269,7 +264,6 @@ function manager()
 
 function runTest(test, callback)
 {
-
     DockerManager.restoreState(test, dockerMocha, (info) =>
     {
         DockerManager.runInits(info.entrypoint, test, dockerMocha, () =>
@@ -285,11 +279,9 @@ function runTest(test, callback)
 
                 DockerManager.stopState(test, dockerMocha, () =>
                 {
-                    callback();
+                    callback(err);
                 });
             })
         })
     })
-
-
 }
