@@ -55,7 +55,7 @@ class DockerMocha
 
         while(parent !== null)
         {
-            hierarchy.push(parent);
+            hierarchy.unshift(parent);
             parent = this.getParent(parent);
         }
 
