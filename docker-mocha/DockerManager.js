@@ -104,7 +104,7 @@ DockerManager.createState = function(test, dockerMocha, callback)
     let parent = dockerMocha.getParent(test);
 
     //vanilla state
-    if(parent === null)
+    if(parent === undefined)
     {
         parent = {};
         parent.name = "vanilla";

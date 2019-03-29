@@ -12,8 +12,8 @@ let entrypoint = null;
 
 const TIMEOUT = 100;
 
-const DEFAULT_TRHEAD = 4;
-let threadsNumber = DEFAULT_TRHEAD;
+const DEFAULT_THREAD = 4;
+let threadsNumber = DEFAULT_THREAD;
 
 let defaultExists = false;
 let overrideExists = false;
@@ -202,12 +202,9 @@ else
         catch(err) {
             setupExists = false;}
 
-        //check if test name aleady exists
-        for(let j in dockerMocha.testList)
-        {
-            if(dockerMocha.testList[j].name === tests[i].name)
-                repeated = true;
-        }
+        //check if test already exists
+        if(dockerMocha.testExists(tests[i].name))
+            repeated = true;
 
         if(tests[i].name && fileExists && setupExists && !repeated)
         {
@@ -220,6 +217,7 @@ else
     console.log("\nAdded the following tests: ");
     dockerMocha.print();
 
+
     //Initialize DockerManager
     DockerManager(1000);
 
@@ -228,16 +226,17 @@ else
     {
         manager();
     });
+
 }
 
 function manager()
 {
-    if(dockerMocha.testList.length > 0 || running > 0)
+    if(dockerMocha.testQueue.length > 0 || running > 0)
     {
-        if(dockerMocha.testList.length > 0 && running < threadsNumber)
+        if(dockerMocha.testQueue.length > 0 && running < threadsNumber)
         {
-            let test = dockerMocha.testList[0];
-            dockerMocha.testList.shift();
+            let test = dockerMocha.testQueue[0];
+            dockerMocha.testQueue.shift();
 
             runTest(test, (err) =>
             {
