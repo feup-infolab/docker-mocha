@@ -79,6 +79,18 @@ DockerManager.removeAllContainers = function(callback)
         })
 };
 
+DockerManager.removeAllVolumes = function(callback)
+{
+    console.log("Removing all volumes", "'docker volume prune'");
+
+    childProcess.exec('docker volume prue',
+        (err, result) =>
+        {
+            callback();
+        })
+
+};
+
 /**
  * Restores a state, returning the info of the restored state. It is responsible for creating states if they do not exist
  * @param test
@@ -89,29 +101,42 @@ DockerManager.restoreState = function(test, dockerMocha, callback)
 {
     console.log("Restoring state: " + test.name);
 
-    DockerManager.checkIfStateExists(test.name, dockerMocha, (exists) =>
+    if(dockerMocha.noCheckpoint)
     {
-        if(!exists)
+        DockerManager.startVanillaWithSetups(test, dockerMocha, (info) =>
         {
-            console.log("State: " + test.name + " does not exist! creating....");
-
-            DockerManager.createState(test, dockerMocha, (info) =>
-            {
-                info.parent = dockerMocha.getParent(test);
-                callback(info);
-            })
-        }
-        else
+            info.parent = null;
+            callback(info);
+        })
+    }
+    else
+    {
+        DockerManager.checkIfStateExists(test.name, dockerMocha, (exists) =>
         {
-            console.log("State: " + test.name + " already exists");
-
-            DockerManager.startState(test, test, dockerMocha, (info) =>
+            if(!exists)
             {
-                info.parent = test;
-                callback(info);
-            })
-        }
-    })
+                console.log("State: " + test.name + " does not exist! creating....");
+
+                DockerManager.createState(test, dockerMocha, (info) =>
+                {
+                    info.parent = dockerMocha.getParent(test);
+                    callback(info);
+                })
+            }
+            else
+            {
+                console.log("State: " + test.name + " already exists");
+
+                DockerManager.startState(test, test, dockerMocha, (info) =>
+                {
+                    info.parent = test;
+                    callback(info);
+                })
+            }
+        })
+    }
+
+
 };
 
 /**
@@ -162,9 +187,18 @@ DockerManager.createState = function(test, dockerMocha, callback)
             })
         }
     })
+};
 
 
-    //}
+DockerManager.startVanillaWithSetups = function(test, dockerMocha, callback)
+{
+    DockerManager.startState(test, null, dockerMocha, (info) =>
+    {
+        DockerManager.runSetups(info.entrypoint, test, dockerMocha, (err, result) =>
+        {
+            callback(info);
+        })
+    })
 };
 
 
@@ -316,6 +350,25 @@ DockerManager.runSetup = function(container, test, callback)
     }
 
     setTimeout(func, timeout);
+};
+
+
+DockerManager.runSetups = function(container, test, dockerMocha, callback)
+{
+    const hierarchy = dockerMocha.getHierarchy(test);
+
+    async.mapSeries(hierarchy,
+        (hierarchyTest, callback) =>
+        {
+            DockerManager.runSetup(container, hierarchyTest, () =>
+            {
+                callback();
+            })
+        },
+        (err, results)=>
+        {
+            callback();
+        });
 };
 
 DockerManager.runInit = function(container, test, callback)

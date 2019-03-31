@@ -2,8 +2,6 @@ const Utils = require('./utils');
 
 class DockerMocha
 {
-
-
     constructor()
     {
         this.testQueue = [];
