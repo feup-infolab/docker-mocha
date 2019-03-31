@@ -19,7 +19,7 @@ DockerManager.getAllServicesInOrchestra = function(dockerMocha, callback)
     const services = Object.keys(dockerMocha.composeContents.services);
     let servicesInfo = [];
 
-    for(let i in services)
+    for(const i in services)
     {
         let service = services[i];
         let container = dockerMocha.composeContents.services[service];
@@ -314,7 +314,7 @@ DockerManager.checkIfStateExists = function(testName, dockerMocha, callback)
                 },
                 (err, results)=>
                 {
-                    for(let i in results)
+                    for(const i in results)
                     {
                         if (results[i] === false)
                         {

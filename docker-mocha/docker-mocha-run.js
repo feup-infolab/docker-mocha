@@ -12,7 +12,9 @@ let overrideFile = null;
 let composeFile = null;
 let entrypoint = null;
 
-const TIMEOUT = 100;
+const SLEEP = 100;
+const MAX_TIMEOUT = 600000;
+const MAX_RETRIES = 5;
 
 const DEFAULT_THREAD = 4;
 let threadsNumber = DEFAULT_THREAD;
@@ -28,6 +30,8 @@ let failedTests = 0;
 
 let startTime;
 let finishTime;
+
+let queue;
 
 for(let i in process.argv)
 {
@@ -262,6 +266,54 @@ else
 
 function manager()
 {
+    /*
+    queue = new Queue(function (test, callback)
+    {
+        runTest(test, (err) =>
+        {
+            if(err > 0)
+            {
+                failedTests++;
+                callback(1);
+            }
+            else
+            {
+                passedTests++;
+
+                const children = dockerMocha.childrenMap[test.name];
+
+                for(const child in children)
+                {
+                    //console.log(children[child]);
+                    queue.push(children[child]);
+                }
+
+                callback(null);
+            }
+        })
+    },
+        {concurrent: threadsNumber, maxRetries: MAX_RETRIES, maxTimeout: MAX_TIMEOUT});
+
+    queue.push(dockerMocha.rootTest);
+
+    queue.on('drain', function ()
+    {
+        finishTime = new Date();
+
+        const res = Math.abs(finishTime - startTime) / 1000;
+        const hours = Math.floor(res / 3600) % 24;
+        const minutes = Math.floor(res / 60) % 60;
+        const seconds = res % 60;
+
+        console.log("Docker Mocha finished with " + passedTests + "/" + (passedTests+failedTests) + " passed tests");
+        console.log("Docker Mocha executed " + (passedTests+failedTests) + "/" + Object.keys(dockerMocha.testsMap).length);
+        console.log("Docker Mocha skipped " + ((Object.keys(dockerMocha.testsMap).length) - (passedTests+failedTests)) + " tests");
+        console.log("Execution finished in " + hours + " hour(s), " + minutes + " minute(s) and " + seconds + " seconds");
+
+        process.exit(0);
+    })
+    */
+
     if(dockerMocha.testQueue.length > 0 || running > 0)
     {
         if(dockerMocha.testQueue.length > 0 && running < threadsNumber)
@@ -282,7 +334,7 @@ function manager()
             running++;
         }
 
-        setTimeout(manager, TIMEOUT);
+        setTimeout(manager, SLEEP);
     }
     else
     {
