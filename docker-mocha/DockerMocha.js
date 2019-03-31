@@ -1,5 +1,9 @@
+const Utils = require('./utils');
+
 class DockerMocha
 {
+
+
     constructor()
     {
         this.testQueue = [];
@@ -12,6 +16,9 @@ class DockerMocha
         this.entrypoint = null;
 
         this.rootTest = null;
+
+        this.noCheckpoint = false;
+        this.noDelete = false;
     }
 
     addTest(test)
@@ -19,7 +26,7 @@ class DockerMocha
         if(test.name && test.test)
         {
             //add the Root test
-            if(test.parent === null)
+            if(Utils.isNull(test.parent))
                 this.rootTest = test;
 
             //create Children map
@@ -59,7 +66,10 @@ class DockerMocha
 
     getParent(test)
     {
-        return this.testsMap[test.parent];
+        if(Utils.isNull(test))
+            return undefined;
+        else
+            return this.testsMap[test.parent];
     }
 
     testExists(name)
@@ -69,7 +79,7 @@ class DockerMocha
 
     getHierarchy(test)
     {
-        if(test === null)
+        if(Utils.isNull(test))
             return null;
 
         let hierarchy = [];
@@ -99,6 +109,8 @@ class DockerMocha
                 "; Setup: " + test.setup +
                 "; Init: " + test.init);
         });
+
+        console.log("\n");
 
         //console.log("Entrypoint: " + this.entrypoint);
         //console.log(this.composeFile);

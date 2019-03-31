@@ -3,6 +3,7 @@ const DockerManager = require("./DockerManager");
 const path = require("path");
 const fs = require("fs");
 const yaml = require("js-yaml");
+const Utils = require("./utils");
 
 const defaultFileName = "tests.json";
 const defaultFile = path.join(process.cwd(), defaultFileName);
@@ -23,6 +24,9 @@ let running = 0;
 
 let passedTests = 0;
 let failedTests = 0;
+
+let startTime;
+let finishTime;
 
 for(let i in process.argv)
 {
@@ -60,6 +64,16 @@ for(let i in process.argv)
         {
             entrypoint = process.argv[Number(i) + 1];
         }
+    }
+
+    if(process.argv[i] === "--no-checkpoint")
+    {
+        dockerMocha.noCheckpoint = true;
+    }
+
+    if(process.argv[i] === "--no-delete")
+    {
+        dockerMocha.noDelete = true;
     }
 }
 
@@ -115,7 +129,7 @@ else
     }
 
     //Loading compose File
-    if(composeFile === null)
+    if(Utils.isNull(composeFile))
     {
         try
         {
@@ -145,7 +159,7 @@ else
         }
     }
 
-    if(entrypoint === null)
+    if(Utils.isNull(entrypoint))
     {
         try
         {
@@ -174,7 +188,7 @@ else
 
         let setup;
 
-        if(tests[i].setup === null)
+        if(Utils.isNull(tests[i].setup))
             setup = null;
         else {
             setup = path.join(process.cwd(), tests[i].setup);
@@ -194,7 +208,7 @@ else
 
         try
         {
-            if(setup === null)
+            if(Utils.isNull(setup))
                 setupExists = true;
             else if(fs.existsSync(setup))
                 setupExists = true;
@@ -221,12 +235,25 @@ else
     //Initialize DockerManager
     DockerManager(1000);
 
-    //Remove all images and start manager
-    DockerManager.deleteAllStates(dockerMocha, () =>
-    {
-        manager();
-    });
+    startTime = new Date();
 
+    //Stop, remove containers and Remove all images. start manager
+    DockerManager.stopAllContainers(() =>
+    {
+        DockerManager.removeAllContainers(() =>
+        {
+            if(dockerMocha.noDelete)
+            {
+                manager();
+            }
+            else
+            {
+                DockerManager.deleteAllStates(dockerMocha, () => {
+                    manager();
+                });
+            }
+        })
+    });
 }
 
 function manager()
@@ -255,31 +282,58 @@ function manager()
     }
     else
     {
+        finishTime = new Date();
+
+        const res = Math.abs(finishTime - startTime) / 1000;
+        const hours = Math.floor(res / 3600) % 24;
+        const minutes = Math.floor(res / 60) % 60;
+        const seconds = res % 60;
+
         console.log("Docker Mocha finished with " + passedTests + "/" + (passedTests+failedTests) + " passed tests");
+        console.log("Docker Mocha executed " + (passedTests+failedTests) + "/" + Object.keys(dockerMocha.testsMap).length);
+        console.log("Docker Mocha skipped " + ((Object.keys(dockerMocha.testsMap).length) - (passedTests+failedTests)) + " tests");
+        console.log("Execution finished in " + hours + " hour(s), " + minutes + " minute(s) and " + seconds + " seconds");
+
         process.exit(0);
     }
+}
+
+function preConfig(callback)
+{
+    if(dockerMocha.noCheckpoint)
+    {
+        DockerManager.deleteAllStates(dockerMocha, () =>
+        {
+            callback();
+        })
+    }
+    else
+        callback();
 }
 
 
 function runTest(test, callback)
 {
-    DockerManager.restoreState(test, dockerMocha, (info) =>
+    preConfig(() =>
     {
-        DockerManager.runInits(info.entrypoint, test, dockerMocha, () =>
+        DockerManager.restoreState(test, dockerMocha, (info) =>
         {
-            DockerManager.runTest(info.entrypoint, test, (err, result) =>
+            DockerManager.runInits(info.entrypoint, test, dockerMocha, () =>
             {
-                if(err > 0)
-                    console.error("Test Failed: " + test.name);
-                else
-                    console.info("Test Passed: " + test.name);
-
-                console.log(result);
-
-                DockerManager.stopState(test, dockerMocha, () =>
+                DockerManager.runTest(info.entrypoint, test, (err, result) =>
                 {
-                    callback(err);
-                });
+                    if(err > 0)
+                        console.error("Test Failed: " + test.name);
+                    else
+                        console.info("Test Passed: " + test.name);
+
+                    console.log(result);
+
+                    DockerManager.stopState(test, info.parent, dockerMocha, () =>
+                    {
+                        callback(err);
+                    });
+                })
             })
         })
     })
