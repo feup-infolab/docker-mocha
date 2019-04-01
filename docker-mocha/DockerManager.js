@@ -81,9 +81,9 @@ DockerManager.removeAllContainers = function(callback)
 
 DockerManager.removeAllVolumes = function(callback)
 {
-    console.log("Removing all volumes", "'docker volume prune'");
+    console.log("Removing all volumes", "'docker volume prune -f'");
 
-    childProcess.exec('docker volume prue',
+    childProcess.exec('docker volume prune -f',
         (err, result) =>
         {
             callback();

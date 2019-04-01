@@ -266,7 +266,13 @@ else
 
 function manager()
 {
-    /*
+    if(Utils.isNull(dockerMocha.rootTest))
+    {
+        console.error("ERROR: No root test specified, please provide exactly one test with no parent dependency");
+        process.exit(1);
+        return;
+    }
+
     queue = new Queue(function (test, callback)
     {
         runTest(test, (err) =>
@@ -280,12 +286,19 @@ function manager()
             {
                 passedTests++;
 
-                const children = dockerMocha.childrenMap[test.name];
+                //given the test passed, remove from reference queue to prevent duplicate execution
+                dockerMocha.referenceMap[test.name] = null;
 
-                for(const child in children)
+                //add children if they were not executed before
+                const children = dockerMocha.childrenMap[test.name];
+                for(const i in children)
                 {
-                    //console.log(children[child]);
-                    queue.push(children[child]);
+                    const child = children[i];
+
+                    if(!(Utils.isNull(dockerMocha.referenceMap[child.name])))
+                    {
+                        queue.push(child);
+                    }
                 }
 
                 callback(null);
@@ -307,13 +320,13 @@ function manager()
 
         console.log("Docker Mocha finished with " + passedTests + "/" + (passedTests+failedTests) + " passed tests");
         console.log("Docker Mocha executed " + (passedTests+failedTests) + "/" + Object.keys(dockerMocha.testsMap).length);
-        console.log("Docker Mocha skipped " + ((Object.keys(dockerMocha.testsMap).length) - (passedTests+failedTests)) + " tests");
+        //console.log("Docker Mocha skipped " + ((Object.keys(dockerMocha.testsMap).length) - (passedTests+failedTests)) + " tests");
         console.log("Execution finished in " + hours + " hour(s), " + minutes + " minute(s) and " + seconds + " seconds");
 
         process.exit(0);
     })
-    */
 
+    /*
     if(dockerMocha.testQueue.length > 0 || running > 0)
     {
         if(dockerMocha.testQueue.length > 0 && running < threadsNumber)
@@ -352,6 +365,7 @@ function manager()
 
         process.exit(0);
     }
+    */
 }
 
 

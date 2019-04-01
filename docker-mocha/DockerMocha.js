@@ -4,8 +4,7 @@ class DockerMocha
 {
     constructor()
     {
-        this.testQueue = [];
-
+        this.referenceMap = {};
         this.testsMap = {};
         this.childrenMap = {};
 
@@ -45,10 +44,11 @@ class DockerMocha
                 this.testsMap[test.name] = test;
             }
 
-            /**
-             * temp
-             */
-            this.testQueue.push(test);
+            //create reference Map
+            if(!(test.name in this.referenceMap))
+            {
+                this.referenceMap[test.name] = test;
+            }
 
             return true;
         }
