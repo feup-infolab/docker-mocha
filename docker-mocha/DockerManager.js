@@ -220,11 +220,13 @@ DockerManager.startState = function(test, parent, dockerMocha, callback)
         parent.name = vanillaString;
     }
 
-    console.log("Starting state: " + test.name,`'export PARENT_STATE=${parent.name} && export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} up -d'` );
+    console.log("Starting state: " + test.name,`'export PARENT_STATE=${parent.name} && export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} -p ${test.name} up -d'` );
 
-    childProcess.exec(`export PARENT_STATE=${parent.name} && export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} up -d`,
+    childProcess.exec(`export PARENT_STATE=${parent.name} && export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} -p ${test.name} up -d`,
         (err, result) =>
         {
+            console.log("STARTSTATE: ", err, result);
+
             let info = {};
             info.entrypoint = test.name + '.' + dockerMocha.entrypoint;
 
@@ -246,7 +248,9 @@ DockerManager.saveState = function(test, dockerMocha, callback)
                 console.log("Saving state: " + test.name, `'docker commit ${test.name}.${service.name} ${service.image}:${test.name}'`);
 
                 childProcess.exec(`docker commit ${test.name}.${service.name} ${service.image}:${test.name}`,
-                    (err, result) => {
+                    (err, result) =>
+                    {
+                        console.log("SAVESTATE: ", err, result);
                         callback();
                     })
             },
@@ -264,11 +268,12 @@ DockerManager.stopState = function(test, parent, dockerMocha, callback)
         parent.name = vanillaString;
     }
 
-    console.log("Stopping state: " + test.name, `'export PARENT_STATE=${parent.name} && export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} down'`);
+    console.log("Stopping state: " + test.name, `'export PARENT_STATE=${parent.name} && export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} -p ${test.name} down'`);
 
-    childProcess.exec(`export PARENT_STATE=${parent.name} && export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} down`,
+    childProcess.exec(`export PARENT_STATE=${parent.name} && export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} -p ${test.name}  down`,
         (err, result) =>
         {
+            console.log("STOPSTATE: ", err, result);
             callback();
         })
 };
@@ -343,8 +348,7 @@ DockerManager.runSetup = function(container, test, callback)
 
         DockerManager.runCommand(container, `node ${test.setup}`, (err, result) =>
         {
-            console.log(err, result);
-
+            console.log("RUNSETUP", err, result);
             callback(err, result);
         });
     }
@@ -377,6 +381,7 @@ DockerManager.runInit = function(container, test, callback)
 
     DockerManager.runCommand(container, `node ${test.init}`, (err, result) =>
     {
+        console.log("RUNINIT", err, result);
         callback();
     })
 };
@@ -403,7 +408,9 @@ DockerManager.runTest = function(container, test, callback)
 {
     console.log("Running test: " + test.name, `'docker exec ${container} ./node_modules/mocha/bin/mocha  ${test.test}'`);
 
-    DockerManager.runCommand(container, `./node_modules/mocha/bin/mocha  ${test.test}`, (err, result) => {
+    DockerManager.runCommand(container, `./node_modules/mocha/bin/mocha  ${test.test}`, (err, result) =>
+    {
+        //console.log("RUNTESET", err, result);
         callback(err, result);
     })
 };

@@ -242,7 +242,7 @@ else
 
     startTime = new Date();
 
-    /*
+
     //Stop, remove containers and Remove all images. start manager
     DockerManager.stopAllContainers(() =>
     {
@@ -263,8 +263,9 @@ else
             });
         })
     });
-    */
 
+
+    /*
     if(dockerMocha.noDelete)
     {
         manager();
@@ -275,6 +276,7 @@ else
             manager();
         });
     }
+    */
 }
 
 function manager()
@@ -396,6 +398,7 @@ function runTest(test, callback)
                 else
                     console.info("Test Passed: " + test.name);
 
+                console.log(err);
                 console.log(result);
 
                 DockerManager.stopState(test, info.parent, dockerMocha, () =>
