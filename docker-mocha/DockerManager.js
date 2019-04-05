@@ -2,6 +2,7 @@ const childProcess = require("child_process");
 const async = require("async");
 const vanillaString = "vanilla";
 const Utils = require('./utils');
+const os = require("os");
 let timeout = 100;
 
 const DockerManager = function (OverrideTime)
@@ -129,8 +130,11 @@ DockerManager.restoreState = function(test, dockerMocha, callback)
 
                 DockerManager.startState(test, test, dockerMocha, (info) =>
                 {
-                    info.parent = test;
-                    callback(info);
+                    DockerManager.waitForConnection(info.entrypoint, 3000, () =>
+                    {
+                        info.parent = test;
+                        callback(info);
+                    })
                 })
             }
         })
@@ -162,11 +166,14 @@ DockerManager.createState = function(test, dockerMocha, callback)
                 {
                     DockerManager.startState(test, parent, dockerMocha, (info) =>
                     {
-                        DockerManager.runSetup(info.entrypoint, test, (err, result) =>
+                        DockerManager.waitForConnection(info.entrypoint, 3000, () =>
                         {
-                            DockerManager.saveState(test, dockerMocha, () =>
+                            DockerManager.runSetup(info.entrypoint, test, (err, result) =>
                             {
-                                callback(info);
+                                DockerManager.saveState(test, dockerMocha, () =>
+                                {
+                                    callback(info);
+                                })
                             })
                         })
                     })
@@ -177,11 +184,14 @@ DockerManager.createState = function(test, dockerMocha, callback)
         {
             DockerManager.startState(test, parent, dockerMocha, (info) =>
             {
-                DockerManager.runSetup(info.entrypoint, test, (err, result) =>
+                DockerManager.waitForConnection(info.entrypoint, 3000, () =>
                 {
-                    DockerManager.saveState(test, dockerMocha, () =>
+                    DockerManager.runSetup(info.entrypoint, test, (err, result) =>
                     {
-                        callback(info);
+                        DockerManager.saveState(test, dockerMocha, () =>
+                        {
+                            callback(info);
+                        })
                     })
                 })
             })
@@ -194,10 +204,13 @@ DockerManager.startVanillaWithSetups = function(test, dockerMocha, callback)
 {
     DockerManager.startState(test, null, dockerMocha, (info) =>
     {
-        DockerManager.runSetups(info.entrypoint, test, dockerMocha, (err, result) =>
+        DockerManager.waitForConnection(info.entrypoint, 3000, () =>
         {
-            callback(info);
-        })
+            DockerManager.runSetups(info.entrypoint, test, dockerMocha, (err, result) =>
+            {
+                callback(info);
+            })
+        });
     })
 };
 
@@ -342,18 +355,13 @@ DockerManager.checkIfStateExists = function(testName, dockerMocha, callback)
  */
 DockerManager.runSetup = function(container, test, callback)
 {
-    function func()
+    console.log("Running setup in: " + container, `'docker exec ${container} node ${test.setup}'`);
+
+    DockerManager.runCommand(container, `node ${test.setup}`, (err, result) =>
     {
-        console.log("Running setup in: " + container, `'docker exec ${container} node ${test.setup}'`);
-
-        DockerManager.runCommand(container, `node ${test.setup}`, (err, result) =>
-        {
-            console.log("RUNSETUP", err, result);
-            callback(err, result);
-        });
-    }
-
-    setTimeout(func, timeout);
+        console.log("RUNSETUP", err, result);
+        callback(err, result);
+    });
 };
 
 
@@ -414,6 +422,79 @@ DockerManager.runTest = function(container, test, callback)
         callback(err, result);
     })
 };
+
+/**
+ * Retrieve a container IP
+ * @param container
+ * @param callback
+ */
+DockerManager.getContainerIP = function(container, callback)
+{
+    childProcess.exec(`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${container}`,
+        (err, result) => {
+            callback(null, result.slice(0, -1));
+        })
+};
+
+DockerManager.waitForConnection = function(container, port, callback)
+{
+    console.log(`Waiting for container ${container} to get online...`);
+
+    DockerManager.getContainerIP(container, (err, ip) =>
+    {
+        DockerManager.loopUp(ip, port, ()=>
+        {
+            callback();
+        })
+    })
+};
+
+DockerManager.loopUp = function(address, port, callback)
+{
+    DockerManager.checkConnection(address, port,
+        (err) =>
+        {
+           if(err)
+           {
+               DockerManager.loopUp(address, port, () =>
+               {
+                   callback();
+               })
+           }
+           else
+           {
+               callback();
+           }
+        });
+};
+
+
+/**
+ * Check network connection, different behaviour for windows and linux-based
+ * @param address
+ * @param port
+ * @param callback
+ */
+DockerManager.checkConnection = function(address, port, callback)
+{
+    if(os.platform() === 'win32')
+    {
+        childProcess.exec(`tnc ${address} -port ${port}`, {shell: 'powershell'},
+            (err, result) =>
+            {
+                callback(err);
+            })
+    }
+    else
+    {
+        childProcess.exec(`nc -z ${address} ${port}`,
+            (err, result) =>
+            {
+                callback(err);
+            })
+    }
+};
+
 
 
 /**
