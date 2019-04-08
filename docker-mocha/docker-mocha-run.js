@@ -71,6 +71,17 @@ for(let i in process.argv)
         }
     }
 
+    //check if port
+    if(process.argv[i] === "-p" || process[i] === "--port")
+    {
+        if((Number(i) + 1) < process.argv.length)
+        {
+            let port = parseInt(process.argv[Number(i) + 1]);
+            if(!isNaN(port))
+                dockerMocha.port = port;
+        }
+    }
+
     if(process.argv[i] === "--no-checkpoint")
     {
         dockerMocha.noCheckpoint = true;
@@ -238,7 +249,7 @@ else
 
 
     //Initialize DockerManager
-    DockerManager(1000);
+    DockerManager();
 
     startTime = new Date();
 

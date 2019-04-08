@@ -11,6 +11,7 @@ class DockerMocha
         this.composeContents = [];
         this.composeFile = null;
         this.entrypoint = null;
+        this.port = 3000;
 
         this.rootTest = null;
 

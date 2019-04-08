@@ -3,12 +3,8 @@ const async = require("async");
 const vanillaString = "vanilla";
 const Utils = require('./utils');
 const os = require("os");
-let timeout = 100;
 
-const DockerManager = function (OverrideTime)
-{
-    timeout = OverrideTime;
-};
+const DockerManager = function () {};
 
 /**
  * Gets information about services for the corresponding orchestra
@@ -130,7 +126,7 @@ DockerManager.restoreState = function(test, dockerMocha, callback)
 
                 DockerManager.startState(test, test, dockerMocha, (info) =>
                 {
-                    DockerManager.waitForConnection(info.entrypoint, 3000, () =>
+                    DockerManager.waitForConnection(info.entrypoint, dockerMocha.port, () =>
                     {
                         info.parent = test;
                         callback(info);
@@ -166,7 +162,7 @@ DockerManager.createState = function(test, dockerMocha, callback)
                 {
                     DockerManager.startState(test, parent, dockerMocha, (info) =>
                     {
-                        DockerManager.waitForConnection(info.entrypoint, 3000, () =>
+                        DockerManager.waitForConnection(info.entrypoint, dockerMocha.port, () =>
                         {
                             DockerManager.runSetup(info.entrypoint, test, (err, result) =>
                             {
@@ -184,7 +180,7 @@ DockerManager.createState = function(test, dockerMocha, callback)
         {
             DockerManager.startState(test, parent, dockerMocha, (info) =>
             {
-                DockerManager.waitForConnection(info.entrypoint, 3000, () =>
+                DockerManager.waitForConnection(info.entrypoint, dockerMocha.port, () =>
                 {
                     DockerManager.runSetup(info.entrypoint, test, (err, result) =>
                     {
@@ -204,7 +200,7 @@ DockerManager.startVanillaWithSetups = function(test, dockerMocha, callback)
 {
     DockerManager.startState(test, null, dockerMocha, (info) =>
     {
-        DockerManager.waitForConnection(info.entrypoint, 3000, () =>
+        DockerManager.waitForConnection(info.entrypoint, dockerMocha.port, () =>
         {
             DockerManager.runSetups(info.entrypoint, test, dockerMocha, (err, result) =>
             {
