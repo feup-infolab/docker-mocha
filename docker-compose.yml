@@ -3,7 +3,7 @@ version: '3.5'
 services:
   dendro:
     container_name: ${TEST_NAME}.dendro
-    image: nuno/node-currency:${PARENT_STATE}
+    image: nuno/node-currency:latest${PARENT_STATE}
     build:
       context: .
       dockerfile: dockerfiles/Dockerfile
@@ -13,10 +13,7 @@ services:
           - dendro
   mongo:
     container_name: ${TEST_NAME}.mongo
-    image: nuno/mongo:${PARENT_STATE}
-    build:
-      context: .
-      dockerfile: dockerfiles/mongo.Dockerfile
+    image: mongo:latest${PARENT_STATE}
     networks:
       custom_net:
         aliases:

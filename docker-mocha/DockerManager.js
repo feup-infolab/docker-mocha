@@ -1,6 +1,7 @@
 const childProcess = require("child_process");
 const async = require("async");
-const vanillaString = "vanilla";
+const vanillaString = "";
+const latestTag = "latest";
 const Utils = require('./utils');
 const os = require("os");
 
@@ -24,7 +25,7 @@ DockerManager.getAllServicesInOrchestra = function(dockerMocha, callback)
         servicesInfo.push({
             service: service,
             name: container.container_name.replace(/\${.*}\./g, ""),
-            image: container.image.replace(/:\${.*}/g, "")
+            image: container.image.replace(/:.*/g, "")
         });
 
     }
@@ -223,15 +224,16 @@ DockerManager.startVanillaWithSetups = function(test, dockerMocha, callback)
  */
 DockerManager.startState = function(test, parent, dockerMocha, callback)
 {
+
     if(Utils.isNull(parent))
     {
         parent = [];
         parent.name = vanillaString;
     }
 
-    console.log("Starting state: " + test.name,`'export PARENT_STATE=${parent.name} && export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} -p ${test.name} up -d'` );
+    console.log("Starting state: " + test.name,`'export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f ${dockerMocha.composeFile} -p ${test.name} up -d'` );
 
-    childProcess.exec(`export PARENT_STATE=${parent.name} && export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} -p ${test.name} up -d`,
+    childProcess.exec(`export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f ${dockerMocha.composeFile} -p ${test.name} up -d`,
         (err, result) =>
         {
             console.log("STARTSTATE: ", err, result);
@@ -254,9 +256,9 @@ DockerManager.saveState = function(test, dockerMocha, callback)
     DockerManager.getAllServicesInOrchestra(dockerMocha, (services) => {
         async.mapSeries(services,
             (service, callback) => {
-                console.log("Saving state: " + test.name, `'docker commit ${test.name}.${service.name} ${service.image}:${test.name}'`);
+                console.log("Saving state: " + test.name, `'docker commit ${test.name}.${service.name} ${service.image}:${latestTag}${test.name}'`);
 
-                childProcess.exec(`docker commit ${test.name}.${service.name} ${service.image}:${test.name}`,
+                childProcess.exec(`docker commit ${test.name}.${service.name} ${service.image}:${latestTag}${test.name}`,
                     (err, result) =>
                     {
                         console.log("SAVESTATE: ", err, result);
@@ -277,9 +279,9 @@ DockerManager.stopState = function(test, parent, dockerMocha, callback)
         parent.name = vanillaString;
     }
 
-    console.log("Stopping state: " + test.name, `'export PARENT_STATE=${parent.name} && export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} -p ${test.name} down'`);
+    console.log("Stopping state: " + test.name, `'export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f ${dockerMocha.composeFile} -p ${test.name} down'`);
 
-    childProcess.exec(`export PARENT_STATE=${parent.name} && export TEST_NAME=${test.name} && docker-compose -f ${dockerMocha.composeFile} -p ${test.name}  down`,
+    childProcess.exec(`export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f ${dockerMocha.composeFile} -p ${test.name}  down`,
         (err, result) =>
         {
             console.log("STOPSTATE: ", err, result);
@@ -311,9 +313,9 @@ DockerManager.checkIfStateExists = function(testName, dockerMocha, callback)
             async.mapSeries(services,
                 (service, callback) =>
                 {
-                    console.log("Checking if state exists: " + testName, `'docker image inspect "${service.image}:${testName}"'`);
+                    console.log("Checking if state exists: " + testName, `'docker image inspect "${service.image}:${latestTag}${testName}"'`);
 
-                    childProcess.exec(`docker image inspect "${service.image}:${testName}"`,
+                    childProcess.exec(`docker image inspect "${service.image}:${latestTag}${testName}"`,
                         (err, result) =>
                         {
                             if(!err && result)

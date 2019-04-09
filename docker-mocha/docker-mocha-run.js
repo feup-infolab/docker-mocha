@@ -351,47 +351,6 @@ function manager()
 
         process.exit(0);
     })
-
-    /*
-    if(dockerMocha.testQueue.length > 0 || running > 0)
-    {
-        if(dockerMocha.testQueue.length > 0 && running < threadsNumber)
-        {
-            let test = dockerMocha.testQueue[0];
-            dockerMocha.testQueue.shift();
-
-            runTest(test, (err) =>
-            {
-                if(err > 0)
-                    failedTests++;
-                else
-                    passedTests++;
-
-                running--;
-            });
-
-            running++;
-        }
-
-        setTimeout(manager, SLEEP);
-    }
-    else
-    {
-        finishTime = new Date();
-
-        const res = Math.abs(finishTime - startTime) / 1000;
-        const hours = Math.floor(res / 3600) % 24;
-        const minutes = Math.floor(res / 60) % 60;
-        const seconds = res % 60;
-
-        console.log("Docker Mocha finished with " + passedTests + "/" + (passedTests+failedTests) + " passed tests");
-        console.log("Docker Mocha executed " + (passedTests+failedTests) + "/" + Object.keys(dockerMocha.testsMap).length);
-        console.log("Docker Mocha skipped " + ((Object.keys(dockerMocha.testsMap).length) - (passedTests+failedTests)) + " tests");
-        console.log("Execution finished in " + hours + " hour(s), " + minutes + " minute(s) and " + seconds + " seconds");
-
-        process.exit(0);
-    }
-    */
 }
 
 
