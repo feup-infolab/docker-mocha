@@ -110,10 +110,6 @@ class DockerMocha
         });
 
         console.log("\n");
-
-        //console.log("Entrypoint: " + this.entrypoint);
-        //console.log(this.composeFile);
-        //console.log(this.composeContents);
     }
 }
 

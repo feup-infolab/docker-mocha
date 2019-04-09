@@ -13,7 +13,7 @@ services:
           - dendro
   mongo:
     container_name: ${TEST_NAME}.mongo
-    image: mongo:latest${PARENT_STATE}
+    image: mongo:3${PARENT_STATE}
     networks:
       custom_net:
         aliases:

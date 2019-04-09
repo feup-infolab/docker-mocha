@@ -1,7 +1,6 @@
 const childProcess = require("child_process");
 const async = require("async");
 const vanillaString = "";
-const latestTag = "latest";
 const Utils = require('./utils');
 const os = require("os");
 
@@ -25,10 +24,12 @@ DockerManager.getAllServicesInOrchestra = function(dockerMocha, callback)
         servicesInfo.push({
             service: service,
             name: container.container_name.replace(/\${.*}\./g, ""),
-            image: container.image.replace(/:.*/g, "")
+            image: container.image.replace(/:.*/g, ""),
+            tag: container.image.replace(/.*\:/g, "").replace(/\${.*}/g, "")
         });
-
     }
+
+
 
     callback(servicesInfo);
 };
@@ -256,9 +257,9 @@ DockerManager.saveState = function(test, dockerMocha, callback)
     DockerManager.getAllServicesInOrchestra(dockerMocha, (services) => {
         async.mapSeries(services,
             (service, callback) => {
-                console.log("Saving state: " + test.name, `'docker commit ${test.name}.${service.name} ${service.image}:${latestTag}${test.name}'`);
+                console.log("Saving state: " + test.name, `'docker commit ${test.name}.${service.name} ${service.image}:${service.tag}${test.name}'`);
 
-                childProcess.exec(`docker commit ${test.name}.${service.name} ${service.image}:${latestTag}${test.name}`,
+                childProcess.exec(`docker commit ${test.name}.${service.name} ${service.image}:${service.tag}${test.name}`,
                     (err, result) =>
                     {
                         console.log("SAVESTATE: ", err, result);
@@ -313,9 +314,9 @@ DockerManager.checkIfStateExists = function(testName, dockerMocha, callback)
             async.mapSeries(services,
                 (service, callback) =>
                 {
-                    console.log("Checking if state exists: " + testName, `'docker image inspect "${service.image}:${latestTag}${testName}"'`);
+                    console.log("Checking if state exists: " + testName, `'docker image inspect "${service.image}:${service.tag}${testName}"'`);
 
-                    childProcess.exec(`docker image inspect "${service.image}:${latestTag}${testName}"`,
+                    childProcess.exec(`docker image inspect "${service.image}:${service.tag}${testName}"`,
                         (err, result) =>
                         {
                             if(!err && result)
