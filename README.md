@@ -1,6 +1,6 @@
 # Docker-Mocha
-Service/end-to-end tests execution in local and isolated environment. 
-Setup Caching (Dissertation Nuno Neto)
+Service/end-to-end tests execution in local and isolated environment.
+With Setup Caching (Dissertation Nuno Neto)
 
 ## Introduction
 Docker-Mocha is a npm package developed in order to optimize a very characteristic set of test environments.
