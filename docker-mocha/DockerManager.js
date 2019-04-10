@@ -231,38 +231,18 @@ DockerManager.startState = function(test, parent, dockerMocha, callback)
         parent.name = vanillaString;
     }
 
-    if(os.platform() === 'win32')
-    {
-        console.log("Starting state: " + test.name,`';$env:PARENT_STATE='${parent.name}'; $env:TEST_NAME='${test.name}'; docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} up -d'` );
+    console.log("Starting state: " + test.name,`'export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}'; docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} up -d'` );
 
-        childProcess.exec(`;$env:PARENT_STATE='${parent.name}'; $env:TEST_NAME='${test.name}'; docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} up -d`, {shell:"powershell.exe"},
-            (err, result) =>
-            {
-                console.log("STARTSTATE: ", err, result);
+    childProcess.exec(`export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}'; docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} up -d`,
+        (err, result) =>
+        {
+            console.log("STARTSTATE: ", err, result);
 
-                let info = {};
-                info.entrypoint = test.name + '.' + dockerMocha.entrypoint;
+            let info = {};
+            info.entrypoint = test.name + '.' + dockerMocha.entrypoint;
 
-                callback(info);
-            })
-    }
-    else
-    {
-        console.log("Starting state: " + test.name,`'export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}'; docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} up -d'` );
-
-        childProcess.exec(`export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}'; docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} up -d`,
-            (err, result) =>
-            {
-                console.log("STARTSTATE: ", err, result);
-
-                let info = {};
-                info.entrypoint = test.name + '.' + dockerMocha.entrypoint;
-
-                callback(info);
-            })
-    }
-
-
+            callback(info);
+        })
 };
 /**
  *
@@ -299,28 +279,14 @@ DockerManager.stopState = function(test, parent, dockerMocha, callback)
         parent.name = vanillaString;
     }
 
-    if(os.platform() === 'win32')
-    {
-        console.log("Stopping state: " + test.name, `';$env:PARENT_STATE='${parent.name}'; $env:TEST_NAME='${test.name}'; docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} down'`);
+    console.log("Stopping state: " + test.name, `'export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} down'`);
 
-        childProcess.exec(`;$env:PARENT_STATE='${parent.name}'; $env:TEST_NAME='${test.name}'; 'docker-compose -f '${dockerMocha.composeFile}' -p ${test.name}  down`,{shell:"powershell.exe"},
-            (err, result) =>
-            {
-                console.log("STOPSTATE: ", err, result);
-                callback();
-            })
-    }
-    else
-    {
-        console.log("Stopping state: " + test.name, `'export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} down'`);
-
-        childProcess.exec(`export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f '${dockerMocha.composeFile}' -p ${test.name}  down`,
-            (err, result) =>
-            {
-                console.log("STOPSTATE: ", err, result);
-                callback();
-            })
-    }
+    childProcess.exec(`export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f '${dockerMocha.composeFile}' -p ${test.name}  down`,
+        (err, result) =>
+        {
+            console.log("STOPSTATE: ", err, result);
+            callback();
+        })
 };
 
 /**
@@ -462,22 +428,10 @@ DockerManager.runTest = function(container, test, callback)
  */
 DockerManager.getContainerIP = function(container, callback)
 {
-    if(os.platform() === 'win32')
-    {
-        childProcess.exec(`;docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${container}`, {shell:"powershell.exe"},
-            (err, result) =>
-            {
-                callback(null, result.slice(0, -1));
-            })
-    }
-    else
-    {
-        childProcess.exec(`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${container}`,
-            (err, result) => {
-                callback(null, result.slice(0, -1));
-            })
-    }
-
+    childProcess.exec(`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${container}`,
+        (err, result) => {
+            callback(null, result.slice(0, -1));
+        })
 };
 
 DockerManager.waitForConnection = function(container, port, callback)
@@ -526,7 +480,7 @@ DockerManager.checkConnection = function(address, port, callback)
         childProcess.exec(`nc -z ${address} ${port}`,
             (err, result) =>
             {
-                console.log(err, result);
+                //console.log(err, result);
                 callback(err);
             })
     }
