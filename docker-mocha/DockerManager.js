@@ -479,6 +479,23 @@ DockerManager.getContainerIP = function(container, callback)
     }
 
 };
+/**
+ * In order for it to work on windows some more functions are needed,
+ * After getting the container IP, it is needed to get the subnet and respective mask,
+ * After that, it is necessary to get the internal interface hvint0 of the MobyLinuxVM, which defaults to 10.0.75.2.
+ * This interface represents the connection from the Virtual Switch to the MobyLinuxVM, where the docker engine is installed.
+ * It could be hardcoded, but it might change in other machines. This is an open issue in docker, in which the containers are not pingable from the host
+ *  https://github.com/docker/for-win/issues/221
+ *  By adding this routes on demand, we would be able to ping the containers, because this interface knows the routes to the internal docekr networks
+ *  However, this is not viable given that it might change and because it changes the internal routes of the windows host.
+ * After getting the IP (which is proven that cannot be retrieved automatically) we add the routes by running in Administrator Powershell
+ * (which is highly unreliable to change the routes of the host)
+ * Now, the containers should be pingable and the netcat script should work
+ *
+ * @param container
+ * @param port
+ * @param callback
+ */
 
 DockerManager.waitForConnection = function(container, port, callback)
 {
