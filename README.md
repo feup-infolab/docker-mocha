@@ -13,9 +13,70 @@ These set of requirments allow to improve the overall execution time of the test
 ## Requirments
 - Docker CE
 - Node.js
+- Netcat 
 - Linux or MacOS (see ... why windows is not supported)
 
+## Support
+This module only supports **mocha** tests. No windows support is available either given the design architecture of docker in windows (see ...).
+
 ## Setup
+To setup docker-mocha the users need to first verify that the requirments are met. Then install it via npm ```npm install docker-mocha```. Additional setup steps are required as it follows
+
+### Tests file
+The users must create a ```tests.json``` file where they list all the tests by file. Each test must have the following parameters:
+
+Parameter | Description
+--------- | -----------
+name | Name of the test and state, must be unique and cannot contain spaces
+parent | Identifier of the parent state it deppends on. If root, leave it ```null```
+test | the relative path of the test file, from the project root. It **cannot** be null
+setup | the relative path of the setup file, from the project root. It can be null
+init | the relative path of the init file, from the project root. It can be null
+
+####  Example 
+
+```json
+[
+  {"name": "init",       "parent": null,       "test": "test/init.js",              "setup": null,                        "init": null},
+  {"name": "testDollar", "parent": "setDollar","test": "test/dollar/testDollar.js", "setup": "setup/dollar/setDollar.js", "init": null},
+  {"name": "setDollar",  "parent": "init",     "test": "test/dollar/setDollar.js",  "setup": "setup/init.js",             "init": null},
+  {"name": "setPound",   "parent": "init",     "test": "test/pound/setPound.js",    "setup": "setup/init.js",             "init": null},
+  {"name": "testPound",  "parent": "setPound", "test": "test/pound/testPound.js",   "setup": "setup/pound/setPound.js",   "init": null}
+]
+```
+
+### Compose file
+This module makes heavy use of docker in order to work. Also, in order to isolate the test environment it requires a valid ```docker-compose.yml```. 
+
+#### Example
+
+```yaml
+version: '3.5'
+
+services:
+  dendro:
+    container_name: ${TEST_NAME}.dendro
+    image: nuno/node-currency:latest${PARENT_STATE}
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile
+    networks:
+      custom_net:
+        aliases:
+          - dendro
+  mongo:
+    container_name: ${TEST_NAME}.mongo
+    image: mongo:3${PARENT_STATE}
+    networks:
+      custom_net:
+        aliases:
+          - mongo
+
+networks:
+  custom_net:
+    name: ${TEST_NAME}
+    driver: bridge
+```    
 
 ## Options
 
