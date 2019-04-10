@@ -492,6 +492,11 @@ DockerManager.getContainerIP = function(container, callback)
  * (which is highly unreliable to change the routes of the host)
  * Now, the containers should be pingable and the netcat script should work
  *
+ * netcat for windows required
+ * how to get the defaultNAT ip:
+ *      Get-NetIPAddress -InterfaceAlias "vEthernet (DockerNAT)" -AddressFamily IPv4 | Format-Table -HideTableHeaders -Property "IPAddress"
+ * when getting the interface hvint0 ip many spaces and tabs might exists, use match() with regex /[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*/
+ /**
  * @param container
  * @param port
  * @param callback
