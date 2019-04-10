@@ -46,7 +46,7 @@ init | the relative path of the init file, from the project root. It can be null
 ```
 
 ### Compose file
-This module makes heavy use of docker in order to work. Also, in order to isolate the test environment it requires a valid ```docker-compose.yml```. In the compose file, the user will initially design the environment needed to mount the whole platform environment. If there is already a compose file for the platform, then the recommended is to create a copy only for docker-mocha and perform the following alterations:
+This module makes heavy use of docker in order to work. Also, in order to isolate the test environment it requires a valid ```docker-compose.yml```. In the compose file, the user will initially design the environment needed to mount the whole platform environment. If there is already a compose file for the platform, then the recommended is to create a copy only for docker-mocha. After creating or copying the file, the compose file must obey a set of rules and alterations:
 
 1. The ```container_name``` property for each service must exist. Also, the string ```${TEST_NAME}.``` should be attached at the beggining of the name string.
 2. The ```image``` property for each service must exist. The users are welcome to use the tag they want to, as long as they use one. If the users are used to ignoring it, use the ```latest``` tag. After the image tag the users must attach the string ```${PARENT_STATE}``` at the end.
