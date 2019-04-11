@@ -103,7 +103,7 @@ Flag | Description
 
 #### Example
 ```shell
-docker-mocha -f ./test/tests.json -t 2 -c docker-compose.yml -e dendro -p 3000 --no-delete"
+docker-mocha -f ./test/tests.json -t 2 -c docker-compose.yml -e dendro -p 3000 --no-delete
 ```
 
 ## Testing
