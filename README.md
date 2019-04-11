@@ -4,23 +4,23 @@ With Setup Caching (Dissertation Nuno Neto)
 
 ## Introduction
 Docker-Mocha is a npm package developed in order to optimize a very characteristic set of test environments.
-Environments with a considerable ammount of service/end-to-end tests and with setup dependencies. In a normal execution these test suites would run in the host machine, in a single thread and with multiple recreations of previous test setup states. The resulting unoptimized pipeline might provide undisired execution times.
+Environments with a considerable ammount of service/end-to-end tests and with setup dependencies. In a normal execution these test suites would run in the host machine, single threaded and with multiple recreations of previous test setup states. The resulting unoptimized pipeline might provide undisired execution times.
 
 Docker-Mocha solves this problem by creating a test dependency tree, each test is executed in a isolated docker environment with its own network. By having isolation, it is possible to run the whole suite in a paralel environment. Additionaly, every setup state is saved (cached) in order for the sucessor test to load and execute more quickly. 
 
-These set of requirments allow to improve the overall execution time of the test suite.
+These set of charactericstis allow to improve the overall execution time of the test suite.
 
 ## Requirments
 - Docker CE
 - Node.js
 - Netcat 
-- Linux or MacOS (see [this](https://github.com/feup-infolab/docker-mocha/wiki/Windows-Support) to understand why windows is not supported)
+- Linux or MacOS
 
 ## Support
 This module only supports **mocha** tests. No windows support is available either given the design architecture of docker in windows (see [this](https://github.com/feup-infolab/docker-mocha/wiki/Windows-Support)).
 
 ## Setup
-To setup docker-mocha the users need to first verify that the requirments are met. Then install it via npm ```npm install docker-mocha```. Additional setup steps are required as it follows
+To setup docker-mocha the users need to first verify that the requirments are met. Then install it via ```npm install docker-mocha```. Additional setup steps are required as it follows:
 
 ### Tests file
 The users must create a ```tests.json``` file where they list all the tests by file. Each test must have the following parameters:
@@ -45,8 +45,12 @@ init | the relative path of the init file, from the project root. It can be ```n
 ]
 ```
 
+For each test, if the state for it does not exist, it will use the parent state, run the setup and execute the test. If the state already exists, then the setup will not be executed.
+
+The init files will always be executed since the root to the current test.
+
 ### Compose file
-This module makes heavy use of docker in order to work. Also, in order to isolate the test environment it requires a valid ```docker-compose.yml```. Version 3.5 or above is required. In the compose file, the user will initially design the environment needed to mount the whole platform environment. If there is already a compose file for the platform, then the recommended is to create a copy only for docker-mocha. After creating or copying the file, the compose file must obey a set of rules and alterations:
+This module makes heavy use of docker in order to work. Also, in order to isolate the test environment it requires a valid ```docker-compose.yml```. Version 3.5 or above is required. The users will initially design the environment needed to mount the whole platform environment. If there is already a compose file for the platform, then the recommended is to create a copy only for docker-mocha. After creating or copying the file, the compose file must obey a set of rules and alterations:
 
 1. The ```container_name``` property for each service must exist. Also, the string ```${TEST_NAME}.``` should be attached at the beggining of the name string.
 2. The ```image``` property for each service must exist. The users are welcome to use the tag they want to, as long as they use one. If the users are used to ignoring it, use the ```latest``` tag. After the image tag the users must attach the string ```${PARENT_STATE}``` at the end.
@@ -85,13 +89,13 @@ networks:
 ```    
 
 ### Options
-To run docker-mocha the users simply need to invoke ```docker-mocha``` in the project root. Some arguments are required, otheres are optional
+To run docker-mocha the users simply need to invoke ```docker-mocha``` in the project root. Aditional options are available
 
  Argument | Alias | Type | Description | Default Value
 --------- | ------| ---- | ----------- | -------------
 ```--file``` | ```-f``` | string |The relative path to the tests file, relative to the project root. | ```tests.json```
 ```--compose``` | ```-c``` | string | The relative path to the docker compose file, relative to the project root. | ```docker-compose.yml```
-```--threads``` | ```-t``` | int | The maximum ammount of tests running in parallel. If not specified. | **4**
+```--threads``` | ```-t``` | int | The maximum ammount of tests running in parallel. | **4**
 ```--entrypoint``` | ```-e``` | string | The name of the services in which the tests will be executed. | project name in package.json
 ```--port``` | ```-p``` | int | The port of the entrypoint service. The execution only continues when the entrypoint + port specified are up | **3000**
 
