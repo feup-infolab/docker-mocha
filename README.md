@@ -14,10 +14,10 @@ These set of requirments allow to improve the overall execution time of the test
 - Docker CE
 - Node.js
 - Netcat 
-- Linux or MacOS (see ... why windows is not supported)
+- Linux or MacOS (see [this](https://github.com/feup-infolab/docker-mocha/wiki/Windows-Support) to understand why windows is not supported)
 
 ## Support
-This module only supports **mocha** tests. No windows support is available either given the design architecture of docker in windows (see ...).
+This module only supports **mocha** tests. No windows support is available either given the design architecture of docker in windows (see [this](https://github.com/feup-infolab/docker-mocha/wiki/Windows-Support)).
 
 ## Setup
 To setup docker-mocha the users need to first verify that the requirments are met. Then install it via npm ```npm install docker-mocha```. Additional setup steps are required as it follows
