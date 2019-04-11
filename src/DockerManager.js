@@ -231,9 +231,9 @@ DockerManager.startState = function(test, parent, dockerMocha, callback)
         parent.name = vanillaString;
     }
 
-    console.log("Starting state: " + test.name,`'export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}'; docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} up -d'` );
+    console.log("Starting state: " + test.name,`'export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} up -d'` );
 
-    childProcess.exec(`export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}'; docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} up -d`,
+    childProcess.exec(`export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} up -d`,
         (err, result) =>
         {
             console.log("STARTSTATE: ", err, result);
@@ -449,7 +449,7 @@ DockerManager.waitForConnection = function(container, port, callback)
 
 DockerManager.loopUp = function(address, port, callback)
 {
-    console.log(address, port);
+    //console.log(address, port);
     DockerManager.checkConnection(address, port,
         (err) =>
         {
