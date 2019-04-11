@@ -1,6 +1,8 @@
 # Docker-Mocha
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/19d06c0bd1594b27b2012fa67adaac98)](https://app.codacy.com/app/excelsi0r/docker-mocha?utm_source=github.com&utm_medium=referral&utm_content=feup-infolab/docker-mocha&utm_campaign=Badge_Grade_Dashboard)
+[![NPM](https://nodei.co/npm/@feup-infolab/docker-mocha.png?mini=true)](https://www.npmjs.com/package/@feup-infolab/docker-mocha)
+
 [![Build Status](https://travis-ci.com/feup-infolab/docker-mocha.svg?branch=master)](https://travis-ci.com/feup-infolab/docker-mocha)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/19d06c0bd1594b27b2012fa67adaac98)](https://app.codacy.com/app/excelsi0r/docker-mocha?utm_source=github.com&utm_medium=referral&utm_content=feup-infolab/docker-mocha&utm_campaign=Badge_Grade_Dashboard)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/0cd59b3ff09e4a2db333372587341b53)](https://www.codacy.com/app/excelsi0r/docker-mocha?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=feup-infolab/docker-mocha&amp;utm_campaign=Badge_Coverage)
 [![npm (scoped)](https://img.shields.io/npm/v/@feup-infolab/docker-mocha.svg?color=blue)](https://www.npmjs.com/package/@feup-infolab/docker-mocha)
 
