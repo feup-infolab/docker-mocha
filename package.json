@@ -27,5 +27,9 @@
   "devDependencies": {
     "mocha": "^6.0.2"
   },
-  "scripts": {}
+  "scripts": {},
+  "bin": {
+    "docker-mocha": "./docker-mocha-run.js",
+    "docker-mocha-graph": "./src/graph.py"
+  }
 }

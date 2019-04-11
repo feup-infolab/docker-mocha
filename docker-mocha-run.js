@@ -1,9 +1,11 @@
-const DockerMocha = require("./DockerMocha");
-const DockerManager = require("./DockerManager");
+#!/usr/bin/env node
+
+const DockerMocha = require("./src/DockerMocha");
+const DockerManager = require("./src/DockerManager");
 const path = require("path");
 const fs = require("fs");
 const yaml = require("js-yaml");
-const Utils = require("./utils");
+const Utils = require("./src/utils");
 const Queue = require('better-queue');
 
 const defaultFileName = "tests.json";
