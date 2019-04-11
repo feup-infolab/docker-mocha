@@ -20,7 +20,8 @@
     "request": "^2.88.0"
   },
   "devDependencies": {
-    "mocha": "^6.0.2"
+    "mocha": "^6.0.2",
+    "nyc": "^13.3.0"
   },
   "description": ""
 }

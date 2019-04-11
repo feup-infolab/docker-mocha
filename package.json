@@ -22,12 +22,16 @@
   "dependencies": {
     "async": "^2.6.2",
     "better-queue": "^3.8.10",
+    "codacy-coverage": "^3.4.0",
     "js-yaml": "^3.12.2"
   },
   "devDependencies": {
-    "mocha": "^6.0.2"
+    "mocha": "^6.0.2",
+    "nyc": "^13.3.0"
   },
-  "scripts": {},
+  "scripts": {
+    "coverage": "nyc node ./docker-mocha-run.js -f ./test/test/tests.json -t 2 -c ./test/docker-compose.yml -e dendro -p 3000 | codacy-coverage"
+  },
   "bin": {
     "docker-mocha": "./docker-mocha-run.js",
     "docker-mocha-graph": "./src/graph.py"

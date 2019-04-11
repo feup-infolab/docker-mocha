@@ -238,7 +238,7 @@ else
         if(dockerMocha.testExists(tests[i].name))
             repeated = true;
 
-        if(tests[i].name && fileExists && setupExists && !repeated)
+        if(tests[i].name && !repeated)
         {
             dockerMocha.addTest(tests[i]);
         }
