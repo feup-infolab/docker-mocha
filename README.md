@@ -111,7 +111,7 @@ docker-mocha -f ./test/tests.json -t 2 -c docker-compose.yml -e dendro -p 3000 -
 ```
 
 ## Testing
-These following tests are provided in this project which were used to debug the implementation of docker-mocha
+These following tests are provided in this project which were used to debug the implementation of docker-mocha. To use this command please change directory to the sub-folder test: ```cd test``
 
 ### Running tests locally
 - Run ```npm test```
