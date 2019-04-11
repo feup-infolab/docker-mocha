@@ -1,24 +1,31 @@
 {
-  "name": "setupcachingtest",
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "test": "./node_modules/mocha/bin/mocha test --recursive",
-    "test-docker": "docker-compose -f docker-compose.test.yml up && docker-compose -f docker-compose.test.yml down",
-    "docker-mocha": "node ./docker-mocha/docker-mocha-run.js -f ./test/tests.json -t 2 -c docker-compose.yml -e dendro -p 3000",
-    "start": "node server.js"
-  },
+  "name": "@feup-infolab/docker-mocha",
+  "version": "0.0.1",
+  "description": "Running mocha tests in isolated, parallel and cached environments",
+  "keywords": [
+    "docker",
+    "mocha",
+    "networks",
+    "isolated",
+    "parallel",
+    "tests",
+    "cached",
+    "end-to-end",
+    "serices",
+    "micro-services",
+    "distributed"
+  ],
+  "repository": "https://github.com/feup-infolab/docker-mocha",
   "author": "nuno.neto",
-  "license": "ISC",
+  "license": "BSD-3-Clause",
+  "main": "docker-mocha-run.js",
   "dependencies": {
     "async": "^2.6.2",
     "better-queue": "^3.8.10",
-    "express": "^4.16.4",
-    "js-yaml": "^3.12.2",
-    "request": "^2.88.0"
+    "js-yaml": "^3.12.2"
   },
   "devDependencies": {
     "mocha": "^6.0.2"
   },
-  "description": ""
+  "scripts": {}
 }
