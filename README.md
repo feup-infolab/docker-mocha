@@ -1,6 +1,6 @@
+# Docker-Mocha
 [![Build Status](https://travis-ci.com/feup-infolab/docker-mocha.svg?branch=master)](https://travis-ci.com/feup-infolab/docker-mocha)
 
-# Docker-Mocha
 Service/end-to-end tests execution in local and isolated environment.
 With Setup Caching (Dissertation Nuno Neto)
 
