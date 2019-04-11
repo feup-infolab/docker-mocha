@@ -1,4 +1,21 @@
 language: node_js
 
+sudo: true
+
+services:
+  - docker
+
+cache:
+  directories:
+    - node_modules
+
+install:
+  - npm install
+
 script:
   - npm install
+
+after_success:
+  - npm coverage
+  - npm report-coverage
+

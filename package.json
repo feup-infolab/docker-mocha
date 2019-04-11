@@ -30,7 +30,9 @@
     "nyc": "^13.3.0"
   },
   "scripts": {
-    "coverage": "nyc node ./docker-mocha-run.js -f ./test/test/tests.json -t 2 -c ./test/docker-compose.yml -e dendro -p 3000 | codacy-coverage"
+    "test": "node ./docker-mocha-run.js -f ./test/test/tests.json -t 2 -c ./test/docker-compose.yml -e dendro -p 3000",
+    "coverage": "nyc --temp-directory=coverage --reporter=lcov npm test",
+    "report-coverage": "node ./node_modules/.bin/codacy-coverage < ./coverage/lcov.info"
   },
   "bin": {
     "docker-mocha": "./docker-mocha-run.js",
