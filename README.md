@@ -29,9 +29,9 @@ Parameter | Description
 --------- | -----------
 name | Name of the test and state, must be unique and cannot contain spaces
 parent | Identifier of the parent state it deppends on. If root, leave it ```null```
-test | the relative path of the test file, from the project root. It **cannot** be null
-setup | the relative path of the setup file, from the project root. It can be null
-init | the relative path of the init file, from the project root. It can be null
+test | the relative path of the test file, from the project root. It **cannot** be ```null```
+setup | the relative path of the setup file, from the project root. It can be ```null```
+init | the relative path of the init file, from the project root. It can be ```null```
 
 ####  Example 
 
