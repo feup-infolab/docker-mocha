@@ -1,5 +1,5 @@
 # Docker-Mocha
-[![NPM](https://nodei.co/npm/@feup-infolab/docker-mocha.png?mini=true)](https://www.npmjs.com/package/@feup-infolab/docker-mocha)
+[![NPM](https://nodei.co/npm/@feup-infolab/docker-mocha.png)](https://www.npmjs.com/package/@feup-infolab/docker-mocha)
 
 [![Build Status](https://travis-ci.com/feup-infolab/docker-mocha.svg?branch=master)](https://travis-ci.com/feup-infolab/docker-mocha)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/19d06c0bd1594b27b2012fa67adaac98)](https://app.codacy.com/app/excelsi0r/docker-mocha?utm_source=github.com&utm_medium=referral&utm_content=feup-infolab/docker-mocha&utm_campaign=Badge_Grade_Dashboard)
