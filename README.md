@@ -124,4 +124,4 @@ These following tests are provided in this project which were used to debug the 
 
 ## Current test approach and dependency tree
 
-![Repository dependency tree](https://github.com/feup-infolab/docker-mocha/blob/master/resources/images/setup-cachingTests.png)
+![Repository dependency tree](https://raw.githubusercontent.com/feup-infolab/docker-mocha/master/resources/images/setup-cachingTests.png)
