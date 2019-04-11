@@ -93,7 +93,7 @@ To run docker-mocha the users simply need to invoke ```docker-mocha``` in the pr
 ```--compose``` | ```-c``` | string | The relative path to the docker compose file, relative to the project root. | ```docker-compose.yml```
 ```--threads``` | ```-t``` | int | The maximum ammount of tests running in parallel. If not specified. | **4**
 ```--entrypoint``` | ```-e``` | string | The name of the services in which the tests will be executed. | project name in package.json
-```--port``` | ```-p``` | int | The port of the entrypoint service. The execution only continues when the entrypoint + port specified are up | *3000*
+```--port``` | ```-p``` | int | The port of the entrypoint service. The execution only continues when the entrypoint + port specified are up | **3000**
 
 ### Flags
 Flag | Description 
@@ -107,6 +107,7 @@ docker-mocha -f ./test/tests.json -t 2 -c docker-compose.yml -e dendro -p 3000 -
 ```
 
 ## Testing
+These following tests are provided in this project which were used to debug the implementation of docker-mocha
 
 ### Running tests locally
 - Run ```npm test```
@@ -115,6 +116,7 @@ docker-mocha -f ./test/tests.json -t 2 -c docker-compose.yml -e dendro -p 3000 -
 - Run ```npm run test-docker```
 
 ### Running tests with docker-mocha
+- Run ```npm run docker-mocha```
 
 ## Current test approach and dependency tree
 
