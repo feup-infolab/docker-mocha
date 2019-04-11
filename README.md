@@ -1,6 +1,7 @@
 # Docker-Mocha
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/19d06c0bd1594b27b2012fa67adaac98)](https://app.codacy.com/app/excelsi0r/docker-mocha?utm_source=github.com&utm_medium=referral&utm_content=feup-infolab/docker-mocha&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.com/feup-infolab/docker-mocha.svg?branch=master)](https://travis-ci.com/feup-infolab/docker-mocha)
+![npm (scoped)](https://img.shields.io/npm/v/@feup-infolab/docker-mocha.svg)
 
 Service/end-to-end tests execution in local and isolated environment.
 With Setup Caching (Dissertation Nuno Neto)
