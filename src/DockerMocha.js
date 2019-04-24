@@ -4,57 +4,102 @@ class DockerMocha
 {
     constructor()
     {
-        this.referenceMap = {};
+        this.statesMap = {};
         this.testsMap = {};
-        this.childrenMap = {};
+        this.dependencyMap = {};
 
         this.composeContents = [];
         this.composeFile = null;
         this.entrypoint = null;
         this.port = 3000;
 
-        this.rootTest = null;
+        this.rootState = null;
 
         this.noCheckpoint = false;
         this.noDelete = false;
     }
 
-    addTest(test)
+    addState(state)
     {
-        if(test.name && test.test)
+        const stateInfo = this.statesMap[state];
+
+        if(!Utils.isNull(stateInfo["depends_on"]))
         {
-            //add the Root test
-            if(Utils.isNull(test.parent))
-                this.rootTest = test;
-
-            //create Children map
-            if (test.parent in this.childrenMap && test.parent !== null)
+            if(Utils.isNull(this.dependencyMap[stateInfo["depends_on"]]))
             {
-                let children = this.childrenMap[test.parent];
-                children.push(test);
-                this.childrenMap[test.parent] = children;
+                this.dependencyMap[stateInfo["depends_on"]] = {};
             }
-            else if(test.parent !== null)
+            if(Utils.isNull(this.dependencyMap[stateInfo["depends_on"]]["child_states"]))
             {
-                this.childrenMap[test.parent] = [test];
+                this.dependencyMap[stateInfo["depends_on"]]["child_states"] = [];
             }
+            this.dependencyMap[stateInfo["depends_on"]]["child_states"].push(state);
+        }
+    }
 
-            //create test Map
-            if(!(test.name in this.testsMap))
-            {
-                this.testsMap[test.name] = test;
-            }
+    verifyAndWarnStates()
+    {
+        let total = 0;
+        let bad = 0;
 
-            //create reference Map
-            if(!(test.name in this.referenceMap))
+        for(let state in this.statesMap)
+        {
+            const valid = this.loopStatesParent(state);
+            if(!valid)
             {
-                this.referenceMap[test.name] = test;
+                bad++;
+                console.warn("WARN: state '" + state + "' does not have complete lineage to root");
             }
 
-            return true;
+            total++;
+        }
+
+        if(bad > 0)
+        {
+            console.log("WARN: Some states are invalid, please check the logs above: " + bad + "/" + total + " of total states");
         }
         else
+        {
+            console.info("INFO: All states parsed and valid");
+        }
+    }
+
+    loopStatesParent(state)
+    {
+        const parentState = this.getParentState(state);
+
+        if(Utils.isNull(parentState))
+        {
+            return true;
+        }
+        else if(this.statesMap.hasOwnProperty(parentState))
+        {
+            return this.loopStatesParent(parentState);
+        }
+        else
+        {
             return false;
+        }
+
+    }
+
+    getParentState(state)
+    {
+        return this.statesMap[state]["depends_on"];
+    }
+
+    addTest(test, testsProp)
+    {
+        if(Utils.isNull(this.dependencyMap[testsProp["state"]]))
+        {
+            this.dependencyMap[testsProp["state"]] = {};
+        }
+        if(Utils.isNull(this.dependencyMap[testsProp["state"]]["child_tests"]))
+        {
+            this.dependencyMap[testsProp["state"]]["child_tests"] = [];
+        }
+        this.dependencyMap[testsProp["state"]]["child_tests"].push(test);
+        this.testsMap[test] = testsProp;
     }
 
     addComposeFile(composeFile, composeContents)

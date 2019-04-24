@@ -197,58 +197,78 @@ else
     console.info("INFO: Using " + threadsNumber + " thread(s)");
 
     //Parsing tests from *.json tests file
-    const tests = JSON.parse(fs.readFileSync(fileToUse, 'utf8'));
+    const testsFile = JSON.parse(fs.readFileSync(fileToUse, 'utf8'));
 
-    //For each test verify if the test file and setup file exist. Add to docker mocha if positive
-    for(let i in tests)
+
+    const tests = testsFile["tests"];
+    const states = testsFile["states"];
+
+    if(Utils.isNull(tests))
     {
-        let file = path.join(process.cwd(), tests[i].test);
-
-        let setup;
-
-        if(Utils.isNull(tests[i].setup))
-            setup = null;
-        else {
-            setup = path.join(process.cwd(), tests[i].setup);
-        }
-
-        let fileExists = false;
-        let setupExists = false;
-        let repeated = false;
-
-        try
-        {
-            if(file != null && fs.existsSync(file))
-                fileExists = true;
-        }
-        catch(err) {
-            fileExists = false;}
-
-        try
-        {
-            if(Utils.isNull(setup))
-                setupExists = true;
-            else if(fs.existsSync(setup))
-                setupExists = true;
-        }
-        catch(err) {
-            setupExists = false;}
-
-        //check if test already exists
-        if(dockerMocha.testExists(tests[i].name))
-            repeated = true;
-
-        if(tests[i].name && !repeated)
-        {
-            dockerMocha.addTest(tests[i]);
-        }
-        else
-            console.warn("WARN: Ignored: " + JSON.stringify(tests[i]));
+        console.error("ERROR: no section 'tests' specified in the test file");
+        process.exit(1);
+    }
+    else if(Utils.isNull(states))
+    {
+        console.error("ERROR: no section 'states' specified in the test file");
+        process.exit(1);
     }
 
-    console.log("\nAdded the following tests: ");
-    dockerMocha.print();
+    //Parsing states
+    dockerMocha.statesMap = states;
+    let rootTests = 0;
+    for(let state in states)
+    {
+       if (states.hasOwnProperty(state))
+       {
+            if(Utils.isNull(states[state]["depends_on"]))
+            {
+                dockerMocha.rootState = state;
+                rootTests++;
+            }
+            dockerMocha.addState(state);
+       }
+    }
+    if(rootTests !== 1)
+    {
+        console.error("ERROR: Multiple root states detected, only one is allowed: " + rootTests);
+        process.exit(1);
+    }
+    dockerMocha.verifyAndWarnStates();
 
+
+    //Parsing tests
+    //For each test verify if the test file and setup file exist. Add to docker mocha if positive
+    let totalTests = 0;
+    let badTests = 0;
+    for(let test in tests)
+    {
+        if(tests.hasOwnProperty(test))
+        {
+            if(!Utils.isNull(tests[test]["state"]) && dockerMocha.statesMap.hasOwnProperty(tests[test]["state"]))
+            {
+                dockerMocha.addTest(test, tests[test]);
+            }
+            else
+            {
+                console.warn("WARN: Ignored: " + JSON.stringify(tests[test]));
+                badTests++;
+            }
+        }
+        totalTests++;
+    }
+    if(badTests > 0)
+    {
+        console.warn("WARN: Some tests have been ignored: " + badTests);
+        console.log("INFO: Added " + (totalTests-badTests) + " tests");
+    }
+    else
+    {
+        console.log("INFO: All tests added: " + (totalTests));
+    }
+
+
+    return;
 
     //Initialize DockerManager
     DockerManager();
