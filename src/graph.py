@@ -6,6 +6,7 @@ import json
 import pprint
 import networkx as nx
 import matplotlib.pyplot as plt
+import math as math
 
 if(len(sys.argv) < 2):
     print "No tests file specified"
@@ -18,18 +19,12 @@ if(not os.path.exists(sys.argv[1])):
 data = json.load(open(sys.argv[1]))
 G = nx.DiGraph()
 
-for test in data:
-    fileExists = os.path.exists(os.path.join(os.getcwd(), test["test"]))
-    setupExists = False
+states = data["states"]
 
-    if test["setup"] == None:
-        setupExists = True
-    else:
-        setupExists = os.path.exists(os.path.join(os.getcwd(), test["setup"]))
+for (k,v) in states.items():
+    if v["depends_on"] is not None:
+        G.add_edge(k, v["depends_on"])
 
-    if  fileExists and setupExists:
-        G.add_edge(test["name"], test["parent"])
-
-nx.draw(G, with_labels=True)
+nx.draw(G, with_labels=True, font_size=8)
 
 plt.show();
