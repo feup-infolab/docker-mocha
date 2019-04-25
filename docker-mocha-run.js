@@ -16,7 +16,7 @@ let entrypoint = null;
 
 const SLEEP = 100;
 const MAX_TIMEOUT = 600000;
-const MAX_RETRIES = 5;
+const MAX_RETRIES = 0;
 
 const DEFAULT_THREAD = 4;
 let threadsNumber = DEFAULT_THREAD;
@@ -267,38 +267,11 @@ else
         console.log("INFO: All tests added: " + (totalTests));
     }
 
-
-    return;
-
     //Initialize DockerManager
     DockerManager();
 
     startTime = new Date();
 
-
-    //Stop, remove containers and Remove all images. start manager
-    DockerManager.stopAllContainers(() =>
-    {
-        DockerManager.removeAllContainers(() =>
-        {
-            DockerManager.removeAllVolumes(() =>
-            {
-                if(dockerMocha.noDelete)
-                {
-                    manager();
-                }
-                else
-                {
-                    DockerManager.deleteAllStates(dockerMocha, () => {
-                        manager();
-                    });
-                }
-            });
-        })
-    });
-
-
-    /*
     if(dockerMocha.noDelete)
     {
         manager();
@@ -309,53 +282,71 @@ else
             manager();
         });
     }
-    */
 }
 
 function manager()
 {
-    if(Utils.isNull(dockerMocha.rootTest))
+    if(Utils.isNull(dockerMocha.rootState))
     {
-        console.error("ERROR: No root test specified, please provide exactly one test with no parent dependency");
+        console.error("ERROR: No root state specified, please provide exactly one state with no parent dependency");
         process.exit(1);
         return;
     }
 
-    queue = new Queue(function (test, callback)
+    queue = new Queue(function (task, callback)
     {
-        runTest(test, (err) =>
+        if(task["type"] === "state")
         {
-            if(err > 0)
+            createState(task["name"], (err) =>
             {
-                failedTests++;
-                callback(1);
-            }
-            else
-            {
-                passedTests++;
-
-                //given the test passed, remove from reference queue to prevent duplicate execution
-                dockerMocha.referenceMap[test.name] = null;
-
-                //add children if they were not executed before
-                const children = dockerMocha.childrenMap[test.name];
-                for(const i in children)
+                if(err > 0)
                 {
-                    const child = children[i];
-
-                    if(!(Utils.isNull(dockerMocha.referenceMap[child.name])))
-                    {
-                        queue.push(child);
-                    }
+                    callback(1);
                 }
+                else
+                {
+                    const childTests = dockerMocha.dependencyMap[task["name"]]["child_tests"];
+                    const childStates = dockerMocha.dependencyMap[task["name"]]["child_states"];
 
-                callback(null);
-            }
-        })
+                    //unlock all the child tests
+                    for(const j in childTests)
+                    {
+                        const test = childTests[j];
+                        queue.push({"type":"test", "name": test});
+                    }
+
+                    //unlock all the child states
+                    for(const i in childStates)
+                    {
+                        const state = childStates[i];
+                        queue.push({"type":"state","name":state});
+                    }
+
+                    callback(null);
+                }
+            })
+
+        }
+        else if(task["type"] === "test")
+        {
+            runTest(task["name"], (err) =>
+            {
+                if(err > 0)
+                {
+                    failedTests++;
+                    callback(1);
+                }
+                else
+                {
+                    passedTests++;
+                    callback(null);
+                }
+            })
+        }
     },
         {concurrent: threadsNumber, maxRetries: MAX_RETRIES, maxTimeout: MAX_TIMEOUT});
 
-    queue.push(dockerMocha.rootTest);
+    queue.push({"type":"state","name":dockerMocha.rootState});
 
     queue.on('drain', function ()
     {
@@ -375,10 +366,17 @@ function manager()
     })
 }
 
-
+function createState(state, callback)
+{
+    console.log("STATE: " + state);
+    callback(0);
+}
 
 function runTest(test, callback)
 {
+    console.log("TEST: " + test);
+    callback(0);
+    /*
     DockerManager.restoreState(test, dockerMocha, (info) =>
     {
         DockerManager.runInits(info.entrypoint, test, dockerMocha, () =>
@@ -400,4 +398,5 @@ function runTest(test, callback)
             })
         })
     })
+    */
 }
