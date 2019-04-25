@@ -3,6 +3,7 @@
 const DockerMocha = require("./src/DockerMocha");
 const DockerManager = require("./src/DockerManager");
 const path = require("path");
+const async = require("async");
 const fs = require("fs");
 const yaml = require("js-yaml");
 const Utils = require("./src/utils");
@@ -368,35 +369,61 @@ function manager()
 
 function createState(state, callback)
 {
-    console.log("STATE: " + state);
-    callback(0);
+    DockerManager.restoreState(state, state, dockerMocha, (info) =>
+    {
+        DockerManager.stopState(state, info.parent, dockerMocha, () =>
+        {
+            callback(err);
+        });
+    });
 }
 
 function runTest(test, callback)
 {
-    console.log("TEST: " + test);
-    callback(0);
-    /*
-    DockerManager.restoreState(test, dockerMocha, (info) =>
+    const state = dockerMocha.getTestState(test);
+    const testPath = dockerMocha.getTestPath(test);
+
+    DockerManager.restoreState(state, test, dockerMocha, (info) =>
     {
-        DockerManager.runInits(info.entrypoint, test, dockerMocha, () =>
+        DockerManager.runTest(info.entrypoint, test, testPath, (err, result) =>
         {
-            DockerManager.runTest(info.entrypoint, test, (err, result) =>
+            if(err > 0)
+                console.error("Test Failed: " + test.name);
+            else
+                console.info("Test Passed: " + test.name);
+
+            console.log(err);
+            console.log(result);
+
+            DockerManager.stopState(state, test, info.parent, dockerMocha, () =>
             {
-                if(err > 0)
-                    console.error("Test Failed: " + test.name);
-                else
-                    console.info("Test Passed: " + test.name);
-
-                console.log(err);
-                console.log(result);
-
-                DockerManager.stopState(test, info.parent, dockerMocha, () =>
-                {
-                    callback(err);
-                });
-            })
+                callback(err);
+            });
         })
     })
-    */
 }
+
+function runSetup(loaderClass)
+{
+    return new Promise(function(resolve, reject)
+    {
+        async.series([
+            function (callback)
+            {
+                loaderClass.init(callback);
+            },
+            function (callback)
+            {
+                loaderClass.load(callback);
+            },
+        ], function (err, result) {
+            if (!err) {
+                resolve(null, result);
+            } else {
+                reject(err, result)
+            }
+        });
+    })
+}
+
+module.exports.runSetup = runSetup;

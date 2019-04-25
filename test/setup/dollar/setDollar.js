@@ -1,18 +1,20 @@
 const request = require('request');
 const port = 3000;
 
-const dollar = 1.13;
-
-function setup(dollarVal)
+class SetDollar
 {
-    if(dollarVal === null)
-        dollarVal = dollar;
-
-    request('http://localhost:' + port + '/add/dollar?value=' + dollarVal, {json:true}, (err, res, body) =>
+    static load(callback)
     {
-        console.log(body);
-    })
+        const dollar = 1.13;
+        request('http://localhost:' + port + '/add/dollar?value=' + dollar, {json:true}, (err, res, body) =>
+        {
+            console.log(body);
+            callback(null);
+        })
+    }
 
+    static init(callback){callback(null)}
 }
 
-setup(dollar);
+
+(async () => {await require("../../docker-mocha-run").runSetup(SetDollar);})();

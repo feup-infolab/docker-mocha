@@ -1,12 +1,18 @@
 const request = require('request');
 const port = 3000;
 
-function setup()
+class Init
 {
-    request('http://localhost:' + port + '/init', {json:true}, (err, res, body) =>
+    static load(callback)
     {
-        console.log(body);
-    })
+        request('http://localhost:' + port + '/init', {json:true}, (err, res, body) =>
+        {
+            console.log(body);
+            callback(null);
+        })
+    }
+
+    static init(callback){callback(null)}
 }
 
-setup();
+(async () => {await require("../../docker-mocha-run").runSetup(Init);})();

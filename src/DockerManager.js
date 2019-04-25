@@ -92,17 +92,18 @@ DockerManager.removeAllVolumes = function(callback)
 
 /**
  * Restores a state, returning the info of the restored state. It is responsible for creating states if they do not exist
- * @param test
+ * @param state
+ * @param project
  * @param dockerMocha
  * @param callback
  */
-DockerManager.restoreState = function(test, dockerMocha, callback)
+DockerManager.restoreState = function(state, project, dockerMocha, callback)
 {
-    console.log("Restoring state: " + test.name);
+    console.log("Restoring state: " + state);
 
     if(dockerMocha.noCheckpoint)
     {
-        DockerManager.startVanillaWithSetups(test, dockerMocha, (info) =>
+        DockerManager.startVanillaWithSetups(state, dockerMocha, (info) =>
         {
             info.parent = null;
             callback(info);
@@ -110,23 +111,23 @@ DockerManager.restoreState = function(test, dockerMocha, callback)
     }
     else
     {
-        DockerManager.checkIfStateExists(test.name, dockerMocha, (exists) =>
+        DockerManager.checkIfStateExists(state, dockerMocha, (exists) =>
         {
             if(!exists)
             {
-                console.log("State: " + test.name + " does not exist! creating....");
+                console.log("State: " + state + " does not exist! creating....");
 
-                DockerManager.createState(test, dockerMocha, (info) =>
+                DockerManager.createState(state, dockerMocha, (info) =>
                 {
-                    info.parent = dockerMocha.getParent(test);
+                    info.parent = dockerMocha.getParent(state);
                     callback(info);
                 })
             }
             else
             {
-                console.log("State: " + test.name + " already exists");
+                console.log("State: " + state + " already exists");
 
-                DockerManager.startState(test, test, dockerMocha, (info) =>
+                DockerManager.startState(state, test, dockerMocha, (info) =>
                 {
                     DockerManager.waitForConnection(info.entrypoint, dockerMocha.port, () =>
                     {
@@ -218,47 +219,46 @@ DockerManager.startVanillaWithSetups = function(test, dockerMocha, callback)
  * ======================
  * State Handle Functions
  * ======================
- * @param test
- * @param parent
+ * @param environment
+ * @param state
  * @param dockerMocha
  * @param callback
  */
-DockerManager.startState = function(test, parent, dockerMocha, callback)
+DockerManager.startEnvironment = function(environment, state, dockerMocha, callback)
 {
-    if(Utils.isNull(parent))
+    if(Utils.isNull(state))
     {
-        parent = [];
-        parent.name = vanillaString;
+        state = vanillaString;
     }
 
-    console.log("Starting state: " + test.name,`'export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} up -d'` );
+    console.log("Starting environment: " + environment,`'export STATE='${state}' && export ENVIRONMENT='${environment}' && docker-compose -f '${dockerMocha.composeFile}' -p ${environment} up -d'` );
 
-    childProcess.exec(`export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} up -d`,
+    childProcess.exec(`export STATE='${state}' && export ENVIRONMENT='${environment}' && docker-compose -f '${dockerMocha.composeFile}' -p ${environment} up -d`,
         (err, result) =>
         {
-            console.log("STARTSTATE: ", err, result);
+            console.log("STARTENVIRONMENT: ", err, result);
 
             let info = {};
-            info.entrypoint = test.name + '.' + dockerMocha.entrypoint;
+            info.entrypoint = environment + '.' + dockerMocha.entrypoint;
 
             callback(info);
         })
 };
 /**
  *
- * @param test, the name of the new state
- * @param parent, the running containers name
+ * @param environment, the running containers name
+ * @param state, the state to be saved
  * @param dockerMocha
  * @param callback
  */
-DockerManager.saveState = function(test, dockerMocha, callback)
+DockerManager.saveState = function(environment, dockerMocha, callback)
 {
     DockerManager.getAllServicesInOrchestra(dockerMocha, (services) => {
         async.mapSeries(services,
             (service, callback) => {
-                console.log("Saving state: " + test.name, `'docker commit ${test.name}.${service.name} ${service.image}:${service.tag}${test.name}'`);
+                console.log("Saving state: " + environment, `'docker commit ${environment}.${service.name} ${service.image}:${service.tag}${environment}'`);
 
-                childProcess.exec(`docker commit ${test.name}.${service.name} ${service.image}:${service.tag}${test.name}`,
+                childProcess.exec(`docker commit ${environment}.${service.name} ${service.image}:${service.tag}${environment}`,
                     (err, result) =>
                     {
                         console.log("SAVESTATE: ", err, result);
@@ -271,34 +271,33 @@ DockerManager.saveState = function(test, dockerMocha, callback)
     })
 };
 
-DockerManager.stopState = function(test, parent, dockerMocha, callback)
+DockerManager.stopEnvironment = function(environment, state, dockerMocha, callback)
 {
-    if(Utils.isNull(parent))
+    if(Utils.isNull(state))
     {
-        parent = [];
-        parent.name = vanillaString;
+        state = vanillaString;
     }
 
-    console.log("Stopping state: " + test.name, `'export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f '${dockerMocha.composeFile}' -p ${test.name} down'`);
+    console.log("Stopping state: " + state, `'export STATE='${state}' && export ENVIRONMENT='${environment}' && docker-compose -f '${dockerMocha.composeFile}' -p ${environment} down'`);
 
-    childProcess.exec(`export PARENT_STATE='${parent.name}' && export TEST_NAME='${test.name}' && docker-compose -f '${dockerMocha.composeFile}' -p ${test.name}  down`,
+    childProcess.exec(`export STATE='${state}' && export ENVIRONMENT='${environment}' && docker-compose -f '${dockerMocha.composeFile}' -p ${environment}  down`,
         (err, result) =>
         {
-            console.log("STOPSTATE: ", err, result);
+            console.log("STOPENVIRONMENT: ", err, result);
             callback();
         })
 };
 
 /**
  * Verifies the existence of a given state. Returns true or false accordingly.
- * @param test
+ * @param state
  * @param dockerMocha
  * @param callback
  */
-DockerManager.checkIfStateExists = function(testName, dockerMocha, callback)
+DockerManager.checkIfStateExists = function(state, dockerMocha, callback)
 {
     //in case it reaches the root, the root always exists
-    if(Utils.isNull(testName))
+    if(Utils.isNull(state))
     {
         callback(true);
         return;
@@ -313,9 +312,9 @@ DockerManager.checkIfStateExists = function(testName, dockerMocha, callback)
             async.mapSeries(services,
                 (service, callback) =>
                 {
-                    console.log("Checking if state exists: " + testName, `'docker image inspect "${service.image}:${service.tag}${testName}"'`);
+                    console.log("Checking if state exists: " + state, `'docker image inspect "${service.image}:${service.tag}${state}"'`);
 
-                    childProcess.exec(`docker image inspect "${service.image}:${service.tag}${testName}"`,
+                    childProcess.exec(`docker image inspect "${service.image}:${service.tag}${state}"`,
                         (err, result) =>
                         {
                             if(!err && result)
@@ -381,40 +380,11 @@ DockerManager.runSetups = function(container, test, dockerMocha, callback)
         });
 };
 
-DockerManager.runInit = function(container, test, callback)
+DockerManager.runTest = function(container, test, testPath, callback)
 {
-    console.log("Running Init: " + test.name, `'docker exec ${container} node ${test.init}'`);
+    console.log("Running test: " + test, `'docker exec ${container} ./node_modules/mocha/bin/mocha  ${testPath}'`);
 
-    DockerManager.runCommand(container, `node ${test.init}`, (err, result) =>
-    {
-        console.log("RUNINIT", err, result);
-        callback();
-    })
-};
-
-DockerManager.runInits = function(container, test, dockerMocha, callback)
-{
-    const hierarchy = dockerMocha.getHierarchy(test);
-
-    async.mapSeries(hierarchy,
-        (hierarchyTest, callback) =>
-        {
-            DockerManager.runInit(container, hierarchyTest, () =>
-            {
-                callback();
-            })
-        },
-        (err, results)=>
-        {
-            callback();
-        });
-};
-
-DockerManager.runTest = function(container, test, callback)
-{
-    console.log("Running test: " + test.name, `'docker exec ${container} ./node_modules/mocha/bin/mocha  ${test.test}'`);
-
-    DockerManager.runCommand(container, `./node_modules/mocha/bin/mocha  ${test.test}`, (err, result) =>
+    DockerManager.runCommand(container, `./node_modules/mocha/bin/mocha  ${testPath}`, (err, result) =>
     {
         //console.log("RUNTESET", err, result);
         callback(err, result);

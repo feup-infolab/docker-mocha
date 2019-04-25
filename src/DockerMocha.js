@@ -80,12 +80,21 @@ class DockerMocha
         {
             return false;
         }
-
     }
 
     getParentState(state)
     {
         return this.statesMap[state]["depends_on"];
+    }
+
+    getTestState(test)
+    {
+        return this.testsMap[test]["depends_on"];
+    }
+
+    getTestPath(test)
+    {
+        return this.testsMap[test]["path"];
     }
 
     addTest(test, testsProp)
@@ -108,12 +117,12 @@ class DockerMocha
         this.composeContents = composeContents;
     }
 
-    getParent(test)
+    getParent(state)
     {
-        if(Utils.isNull(test))
+        if(Utils.isNull(state))
             return undefined;
         else
-            return this.testsMap[test.parent];
+            return this.testsMap[state]["depends_on"];
     }
 
     testExists(name)

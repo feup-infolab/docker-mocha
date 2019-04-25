@@ -1,17 +1,20 @@
 const request = require('request');
 const port = 3000;
 
-const pound = 0.86;
 
-function setup(poundVal)
+class SetPound
 {
-    if(poundVal === null)
-        poundVal = pound;
-
-        request('http://localhost:' + port + '/add/pound?value=' + poundVal, {json:true}, (err, res, body) =>
+    static load(callback)
+    {
+        const pound = 0.86;
+        request('http://localhost:' + port + '/add/pound?value=' + pound, {json:true}, (err, res, body) =>
         {
             console.log(body);
+            callback(null);
         })
+    }
+
+    static init(callback){callback(null)}
 }
 
-setup(pound);
+(async () => {await require("../../docker-mocha-run").runSetup(SetPound);})();
