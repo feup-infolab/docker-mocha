@@ -319,6 +319,8 @@ function manager()
                     const state = childStates[i];
                     queue.push({"type": "state", "name": state});
                 }
+
+                callback(null);
             }
             else
             {
@@ -395,14 +397,9 @@ function createState(state, callback)
 {
     let stateParent = dockerMocha.getStateParent(state);
 
-    if(Utils.isNull(stateParent))
-    {
-        stateParent = vanillaString;
-    }
-
     DockerManager.restoreState(state, state, dockerMocha, (info) =>
     {
-        DockerManager.stopEnvironment(stateParent, state, dockerMocha, () =>
+        DockerManager.stopEnvironment(state, stateParent, dockerMocha, (err) =>
         {
             callback(err);
         });
@@ -432,7 +429,7 @@ function runTest(test, callback)
             console.log(err);
             console.log(result);
 
-            DockerManager.stopEnvironment(exitState, test, info.parent, dockerMocha, () =>
+            DockerManager.stopEnvironment(test, exitState, dockerMocha, () =>
             {
                 callback(err);
             });

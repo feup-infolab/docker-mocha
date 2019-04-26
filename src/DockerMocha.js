@@ -66,7 +66,7 @@ class DockerMocha
 
     loopStatesParent(state)
     {
-        const parentState = this.getParentState(state);
+        const parentState = this.getStateParent(state);
 
         if(Utils.isNull(parentState))
         {
@@ -134,12 +134,12 @@ class DockerMocha
         let hierarchy = [];
         hierarchy.push(state);
 
-        let parent = this.getParentState(state);
+        let parent = this.getStateParent(state);
 
         while(parent !== undefined)
         {
             hierarchy.unshift(parent);
-            parent = this.getParent(parent);
+            parent = this.getStateParent(parent);
         }
 
         return hierarchy;

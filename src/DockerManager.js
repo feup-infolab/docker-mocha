@@ -103,6 +103,7 @@ DockerManager.restoreState = function(state, project, dockerMocha, callback)
 
     if(dockerMocha.noCheckpoint)
     {
+        //in the event for tests when no checkpoint
         DockerManager.startVanillaWithSetups(state, project, dockerMocha, (info) =>
         {
             callback(info);
@@ -112,6 +113,7 @@ DockerManager.restoreState = function(state, project, dockerMocha, callback)
     {
         DockerManager.checkIfStateExists(state, dockerMocha, (exists) =>
         {
+            //in the event when creating a state where it does not exist
             if(!exists)
             {
                 console.log("State: " + state + " does not exist! creating....");
@@ -121,11 +123,11 @@ DockerManager.restoreState = function(state, project, dockerMocha, callback)
                     callback(info);
                 })
             }
-            else
+            else //in the event when running a test, the state already exists
             {
                 console.log("State: " + state + " already exists");
 
-                DockerManager.startEnvironment(state, project, dockerMocha, (info) =>
+                DockerManager.startEnvironment(project, state, dockerMocha, (info) =>
                 {
                     DockerManager.waitForConnection(info.entrypoint, dockerMocha.port, () =>
                     {
@@ -150,10 +152,11 @@ DockerManager.createState = function(state, dockerMocha, callback)
     console.log("Creating State: " + state);
 
     const stateParent = dockerMocha.getStateParent(state);
-    const setupPath = dockerMocha.getStateSetup(state);
 
     DockerManager.checkIfStateExists(stateParent, dockerMocha, (exists) =>
     {
+        //in the event when creating the state and the parent does not exist
+        //WITH THE NEW CHANGES IT NEVER HAPPENS
         if(!exists)
         {
             DockerManager.createState(stateParent, dockerMocha, () =>
@@ -164,7 +167,7 @@ DockerManager.createState = function(state, dockerMocha, callback)
                     {
                         DockerManager.waitForConnection(info.entrypoint, dockerMocha.port, () =>
                         {
-                            DockerManager.runSetup(info.entrypoint, setupPath, (err, result) =>
+                            DockerManager.runSetup(info.entrypoint, state, dockerMocha,(err, result) =>
                             {
                                 DockerManager.saveEnvironment(state, dockerMocha, () =>
                                 {
@@ -176,13 +179,13 @@ DockerManager.createState = function(state, dockerMocha, callback)
                 })
             })
         }
-        else
+        else //In the event when creating a state and the father exists
         {
             DockerManager.startEnvironment(state, stateParent, dockerMocha, (info) =>
             {
                 DockerManager.waitForConnection(info.entrypoint, dockerMocha.port, () =>
                 {
-                    DockerManager.runSetup(info.entrypoint, setupPath, (err, result) =>
+                    DockerManager.runSetup(info.entrypoint, state, dockerMocha,(err, result) =>
                     {
                         DockerManager.saveEnvironment(state, dockerMocha, () =>
                         {
@@ -195,7 +198,7 @@ DockerManager.createState = function(state, dockerMocha, callback)
     })
 };
 
-
+//Only When running no checkpoint tests
 DockerManager.startVanillaWithSetups = function(state, project, dockerMocha, callback)
 {
     DockerManager.startEnvironment(project, null, dockerMocha, (info) =>
@@ -221,7 +224,7 @@ DockerManager.startVanillaWithSetups = function(state, project, dockerMocha, cal
  * @param dockerMocha
  * @param callback
  */
-DockerManager.startEnvironment = function(state, environment, dockerMocha, callback)
+DockerManager.startEnvironment = function(environment, state, dockerMocha, callback)
 {
     if(Utils.isNull(state))
     {
@@ -267,7 +270,7 @@ DockerManager.saveEnvironment = function(environment, dockerMocha, callback)
     })
 };
 
-DockerManager.stopEnvironment = function(state, environment, dockerMocha, callback)
+DockerManager.stopEnvironment = function(environment, state, dockerMocha, callback)
 {
     if(Utils.isNull(state))
     {
@@ -280,7 +283,7 @@ DockerManager.stopEnvironment = function(state, environment, dockerMocha, callba
         (err, result) =>
         {
             console.log("STOPENVIRONMENT: ", err, result);
-            callback();
+            callback(err);
         })
 };
 
@@ -346,11 +349,12 @@ DockerManager.checkIfStateExists = function(state, dockerMocha, callback)
  * Container Interaction functions
  * ===============================
  */
-DockerManager.runSetup = function(container, test, callback)
+DockerManager.runSetup = function(container, state, dockerMocha, callback)
 {
     console.log("Running setup in: " + container, `'docker exec ${container} node ${test.setup}'`);
+    const statePath = dockerMocha.getStateSetup(state);
 
-    DockerManager.runCommand(container, `node ${test.setup}`, (err, result) =>
+    DockerManager.runCommand(container, `node ${statePath}`, (err, result) =>
     {
         console.log("RUNSETUP", err, result);
         callback(err, result);
@@ -363,9 +367,9 @@ DockerManager.runSetups = function(container, state, dockerMocha, callback)
     const hierarchy = dockerMocha.getHierarchy(state);
 
     async.mapSeries(hierarchy,
-        (hierarchyTest, callback) =>
+        (hierarchyState, callback) =>
         {
-            DockerManager.runSetup(container, hierarchyTest, () =>
+            DockerManager.runSetup(container, hierarchyState, dockerMocha,() =>
             {
                 callback();
             })
