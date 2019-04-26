@@ -15,6 +15,8 @@ let overrideFile = null;
 let composeFile = null;
 let entrypoint = null;
 
+const vanillaString = "";
+
 const SLEEP = 100;
 const MAX_TIMEOUT = 600000;
 const MAX_RETRIES = 0;
@@ -298,35 +300,57 @@ function manager()
     {
         if(task["type"] === "state")
         {
-            createState(task["name"], (err) =>
+            //In case no Checkpoint flag, immediately unlock
+            if (dockerMocha.noCheckpoint)
             {
-                if(err > 0)
+                const childTests = dockerMocha.dependencyMap[task["name"]]["child_tests"];
+                const childStates = dockerMocha.dependencyMap[task["name"]]["child_states"];
+
+                //unlock all the child tests
+                for (const j in childTests)
                 {
-                    callback(1);
+                    const test = childTests[j];
+                    queue.push({"type": "test", "name": test});
                 }
-                else
+
+                //unlock all the child states
+                for (const i in childStates)
                 {
-                    const childTests = dockerMocha.dependencyMap[task["name"]]["child_tests"];
-                    const childStates = dockerMocha.dependencyMap[task["name"]]["child_states"];
-
-                    //unlock all the child tests
-                    for(const j in childTests)
-                    {
-                        const test = childTests[j];
-                        queue.push({"type":"test", "name": test});
-                    }
-
-                    //unlock all the child states
-                    for(const i in childStates)
-                    {
-                        const state = childStates[i];
-                        queue.push({"type":"state","name":state});
-                    }
-
-                    callback(null);
+                    const state = childStates[i];
+                    queue.push({"type": "state", "name": state});
                 }
-            })
+            }
+            else
+            {
+                createState(task["name"], (err) =>
+                {
+                    if (err > 0)
+                    {
+                        callback(1);
+                    }
+                    else
+                    {
+                        const childTests = dockerMocha.dependencyMap[task["name"]]["child_tests"];
+                        const childStates = dockerMocha.dependencyMap[task["name"]]["child_states"];
 
+                        //unlock all the child tests
+                        for (const j in childTests)
+                        {
+                            const test = childTests[j];
+                            queue.push({"type": "test", "name": test});
+                        }
+
+                        //unlock all the child states
+                        for (const i in childStates)
+                        {
+                            const state = childStates[i];
+                            queue.push({"type": "state", "name": state});
+                        }
+
+                        callback(null);
+                    }
+                })
+            }
         }
         else if(task["type"] === "test")
         {
@@ -369,9 +393,16 @@ function manager()
 
 function createState(state, callback)
 {
+    let stateParent = dockerMocha.getStateParent(state);
+
+    if(Utils.isNull(stateParent))
+    {
+        stateParent = vanillaString;
+    }
+
     DockerManager.restoreState(state, state, dockerMocha, (info) =>
     {
-        DockerManager.stopState(state, info.parent, dockerMocha, () =>
+        DockerManager.stopEnvironment(stateParent, state, dockerMocha, () =>
         {
             callback(err);
         });
@@ -382,20 +413,26 @@ function runTest(test, callback)
 {
     const state = dockerMocha.getTestState(test);
     const testPath = dockerMocha.getTestPath(test);
+    let exitState;
+
+    if(dockerMocha.noCheckpoint)
+        exitState = null;
+    else
+        exitState = state;
 
     DockerManager.restoreState(state, test, dockerMocha, (info) =>
     {
         DockerManager.runTest(info.entrypoint, test, testPath, (err, result) =>
         {
             if(err > 0)
-                console.error("Test Failed: " + test.name);
+                console.error("Test Failed: " + test);
             else
-                console.info("Test Passed: " + test.name);
+                console.info("Test Passed: " + test);
 
             console.log(err);
             console.log(result);
 
-            DockerManager.stopState(state, test, info.parent, dockerMocha, () =>
+            DockerManager.stopEnvironment(exitState, test, info.parent, dockerMocha, () =>
             {
                 callback(err);
             });

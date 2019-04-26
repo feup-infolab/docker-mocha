@@ -82,11 +82,6 @@ class DockerMocha
         }
     }
 
-    getParentState(state)
-    {
-        return this.statesMap[state]["depends_on"];
-    }
-
     getTestState(test)
     {
         return this.testsMap[test]["depends_on"];
@@ -117,28 +112,29 @@ class DockerMocha
         this.composeContents = composeContents;
     }
 
-    getParent(state)
+
+    getStateParent(state)
     {
         if(Utils.isNull(state))
             return undefined;
         else
-            return this.testsMap[state]["depends_on"];
+            return this.statesMap[state]["depends_on"];
     }
 
-    testExists(name)
+    getStateSetup(state)
     {
-        return name in this.testsMap;
+        return this.statesMap[state]["path"];
     }
 
-    getHierarchy(test)
+    getHierarchy(state)
     {
-        if(Utils.isNull(test))
+        if(Utils.isNull(state))
             return null;
 
         let hierarchy = [];
-        hierarchy.push(test);
+        hierarchy.push(state);
 
-        let parent = this.getParent(test);
+        let parent = this.getParentState(state);
 
         while(parent !== undefined)
         {
