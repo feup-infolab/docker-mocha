@@ -351,8 +351,8 @@ DockerManager.checkIfStateExists = function(state, dockerMocha, callback)
  */
 DockerManager.runSetup = function(container, state, dockerMocha, callback)
 {
-    console.log("Running setup in: " + container, `'docker exec ${container} node ${test.setup}'`);
     const statePath = dockerMocha.getStateSetup(state);
+    console.log("Running setup in: " + container, `'docker exec ${container} node ${statePath}'`);
 
     DockerManager.runCommand(container, `node ${statePath}`, (err, result) =>
     {
