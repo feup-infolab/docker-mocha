@@ -1,7 +1,7 @@
 const request = require('request');
 const port = 3000;
 
-class SetDollar
+class SetPound
 {
     static load(callback)
     {
@@ -17,4 +17,4 @@ class SetDollar
 }
 
 
-(async () => {await require("../../docker-mocha-run").runSetup(SetDollar);})();
+(async () => {await require("../../src/RunSetup").runSetup(SetPound);})();

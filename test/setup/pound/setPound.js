@@ -17,4 +17,4 @@ class SetPound
     static init(callback){callback(null)}
 }
 
-(async () => {await require("../../docker-mocha-run").runSetup(SetPound);})();
+(async () => {await require("../../src/RunSetup").runSetup(SetPound);})();

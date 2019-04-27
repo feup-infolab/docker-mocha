@@ -18,7 +18,7 @@
   "repository": "https://github.com/feup-infolab/docker-mocha",
   "author": "nuno.neto",
   "license": "BSD-3-Clause",
-  "main": "docker-mocha-run.js",
+  "main": "src/RunSetup.js",
   "dependencies": {
     "async": "^2.6.2",
     "better-queue": "^3.8.10",
@@ -30,7 +30,7 @@
     "codacy-coverage": "^3.4.0"
   },
   "scripts": {
-    "test": "node ./docker-mocha-run.js -f ./test/test/tests.json -t 1 -c ./test/docker-compose.yml -e dendro -p 3000 --no-delete",
+    "test": "cp docker-mocha-run.js ./test/docker-mocha-run.js && cp src/* ./test/src && node ./docker-mocha-run.js -f ./test/test/tests.json -t 2 -c ./test/docker-compose.yml -e dendro -p 3000",
     "coverage": "nyc --temp-directory=coverage --reporter=lcov npm test",
     "report-coverage": "node ./node_modules/.bin/codacy-coverage < ./coverage/lcov.info"
   },

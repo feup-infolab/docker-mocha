@@ -15,4 +15,4 @@ class Init
     static init(callback){callback(null)}
 }
 
-(async () => {await require("../../docker-mocha-run").runSetup(Init);})();
+(async () => {await require("../src/RunSetup").runSetup(Init);})();
