@@ -136,7 +136,7 @@ class DockerMocha
 
         let parent = this.getStateParent(state);
 
-        while(parent !== undefined)
+        while(!Utils.isNull(parent))
         {
             hierarchy.unshift(parent);
             parent = this.getStateParent(parent);
