@@ -59,7 +59,7 @@ for(let i in process.argv)
     }
 
     //Check if alternate docker compose exists
-    if(process.argv[i] === "-c" || process[i] === "--compose")
+    if(process.argv[i] === "-c" || process.argv[i] === "--compose")
     {
         if((Number(i) + 1) < process.argv.length)
         {
@@ -68,7 +68,7 @@ for(let i in process.argv)
     }
 
     //Check if test entrypoint specified
-    if(process.argv[i] === "-e" || process[i] === "--entrypoint")
+    if(process.argv[i] === "-e" || process.argv[i] === "--entrypoint")
     {
         if((Number(i) + 1) < process.argv.length)
         {
@@ -77,13 +77,21 @@ for(let i in process.argv)
     }
 
     //check if port
-    if(process.argv[i] === "-p" || process[i] === "--port")
+    if(process.argv[i] === "-p" || process.argv[i] === "--port")
     {
         if((Number(i) + 1) < process.argv.length)
         {
             let port = parseInt(process.argv[Number(i) + 1]);
             if(!isNaN(port))
                 dockerMocha.port = port;
+        }
+    }
+
+    if(process.argv[i] === "--config")
+    {
+        if((Number(i) + 1) < process.argv.length)
+        {
+            dockerMocha.deployment_config = process.argv[Number(i) + 1];
         }
     }
 
@@ -419,7 +427,7 @@ function runTest(test, callback)
 
     DockerManager.restoreState(state, test, dockerMocha, (info) =>
     {
-        DockerManager.runTest(info.entrypoint, test, testPath, (err, result) =>
+        DockerManager.runTest(info.entrypoint, test, testPath, dockerMocha, (err, result) =>
         {
             if(err > 0)
                 console.error("Test Failed: " + test);

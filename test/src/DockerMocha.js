@@ -17,6 +17,8 @@ class DockerMocha
 
         this.noCheckpoint = false;
         this.noDelete = false;
+
+        this.deployment_config = null;
     }
 
     addState(state)

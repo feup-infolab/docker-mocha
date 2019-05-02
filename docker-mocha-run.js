@@ -427,7 +427,7 @@ function runTest(test, callback)
 
     DockerManager.restoreState(state, test, dockerMocha, (info) =>
     {
-        DockerManager.runTest(info.entrypoint, test, testPath, (err, result) =>
+        DockerManager.runTest(info.entrypoint, test, testPath, dockerMocha, (err, result) =>
         {
             if(err > 0)
                 console.error("Test Failed: " + test);

@@ -352,9 +352,17 @@ DockerManager.checkIfStateExists = function(state, dockerMocha, callback)
 DockerManager.runSetup = function(container, state, dockerMocha, callback)
 {
     const setupPath = dockerMocha.getStateSetup(state);
-    console.log("Running setup in: " + container, `'docker exec ${container} node ${setupPath}'`);
 
-    DockerManager.runCommand(container, `node ${setupPath}`, (err, result) =>
+    let configOption = "";
+
+    if(!Utils.isNull(dockerMocha.deployment_config))
+    {
+        configOption = `--config='${dockerMocha.deployment_config}'`
+    }
+
+    console.log("Running setup in: " + container, `'docker exec ${container} node ${setupPath} ${configOption}'`);
+
+    DockerManager.runCommand(container, `node ${setupPath} ${configOption}`, (err, result) =>
     {
         console.log("RUNSETUP", err, result);
         callback(err, result);
@@ -380,13 +388,20 @@ DockerManager.runSetups = function(container, state, dockerMocha, callback)
         });
 };
 
-DockerManager.runTest = function(container, test, testPath, callback)
+DockerManager.runTest = function(container, test, testPath, dockerMocha, callback)
 {
-    console.log("Running test: " + test, `'docker exec ${container} ./node_modules/mocha/bin/mocha  ${testPath}'`);
+    let configOption = "";
 
-    DockerManager.runCommand(container, `./node_modules/mocha/bin/mocha  ${testPath}`, (err, result) =>
+    if(!Utils.isNull(dockerMocha.deployment_config))
     {
-        //console.log("RUNTESET", err, result);
+        configOption = `--config='${dockerMocha.deployment_config}'`
+    }
+
+    console.log("Running test: " + test, `'docker exec ${container} ./node_modules/mocha/bin/mocha  ${testPath} ${configOption}'`);
+
+    DockerManager.runCommand(container, `./node_modules/mocha/bin/mocha  ${testPath} ${configOption}`, (err, result) =>
+    {
+        console.log("RUNTESET", err, result);
         callback(err, result);
     })
 };
