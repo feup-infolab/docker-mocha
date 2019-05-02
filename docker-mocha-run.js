@@ -289,8 +289,12 @@ else
     }
     else
     {
-        DockerManager.deleteAllStates(dockerMocha, () => {
-            manager();
+        DockerManager.removeAllVolumes(() =>
+        {
+            DockerManager.deleteAllStates(dockerMocha, () =>
+            {
+                manager();
+            });
         });
     }
 }
