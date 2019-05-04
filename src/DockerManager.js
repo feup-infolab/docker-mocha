@@ -41,9 +41,9 @@ DockerManager.deleteAllStates = function(dockerMocha, callback)
         async.mapSeries(services,
             (service, callback) =>
             {
-                console.log("Deleting all states", `'docker images | grep ${service.image} | tr -s ' ' | cut -d ' ' -f 2 | xargs -I {} docker rmi ${service.image}:{}'`);
+                console.log("Deleting all states", `'docker images | grep ${service.image} | tr -s ' ' | cut -d ' ' -f 2 | xargs -I {} docker rmi ${service.image}:{} -f'`);
 
-                childProcess.exec(`docker images | grep ${service.image} | tr -s ' ' | cut -d ' ' -f 2 | xargs -I {} docker rmi ${service.image}:{}`,
+                childProcess.exec(`docker images | grep ${service.image} | tr -s ' ' | cut -d ' ' -f 2 | xargs -I {} docker rmi ${service.image}:{} -f`,
                     (err, result) =>
                     {
                         callback();
@@ -54,6 +54,29 @@ DockerManager.deleteAllStates = function(dockerMocha, callback)
                 callback();
             });
     })
+};
+
+
+DockerManager.StopAndRemoveContainers = function(environment, dockerMocha, callback)
+{
+    console.log("Stopping and Removing all containers");
+
+    childProcess.exec(`docker rm $(docker stop $(docker ps -a -q --filter name="${environment}.*"))`,
+        (err, result) =>
+        {
+            callback();
+        })
+};
+
+DockerManager.RemoveNetworks = function(environment, dockerMocha, callback)
+{
+    console.log("Removing Networks");
+
+    childProcess.exec(`docker network rm $(docker network ls -q --filter name="${environment}")`,
+        (err, result) =>
+        {
+            callback();
+        })
 };
 
 DockerManager.stopAllContainers = function(callback)
@@ -77,6 +100,8 @@ DockerManager.removeAllContainers = function(callback)
             callback();
         })
 };
+
+
 
 DockerManager.removeAllVolumes = function(callback)
 {

@@ -289,8 +289,12 @@ else
     }
     else
     {
-        DockerManager.deleteAllStates(dockerMocha, () => {
-            manager();
+        DockerManager.removeAllVolumes(() =>
+        {
+            DockerManager.deleteAllStates(dockerMocha, () =>
+            {
+                manager();
+            });
         });
     }
 }
@@ -405,13 +409,19 @@ function createState(state, callback)
 {
     let stateParent = dockerMocha.getStateParent(state);
 
-    DockerManager.restoreState(state, state, dockerMocha, (info) =>
+    DockerManager.RemoveNetworks(state, dockerMocha, () =>
     {
-        DockerManager.stopEnvironment(state, stateParent, dockerMocha, (err) =>
+        DockerManager.StopAndRemoveContainers(state, dockerMocha, () =>
         {
-            callback(err);
-        });
-    });
+            DockerManager.restoreState(state, state, dockerMocha, (info) =>
+            {
+                DockerManager.stopEnvironment(state, stateParent, dockerMocha, (err) =>
+                {
+                    callback(err);
+                });
+            });
+        })
+    })
 }
 
 function runTest(test, callback)
@@ -425,22 +435,28 @@ function runTest(test, callback)
     else
         exitState = state;
 
-    DockerManager.restoreState(state, test, dockerMocha, (info) =>
+    DockerManager.RemoveNetworks(state, dockerMocha, () =>
     {
-        DockerManager.runTest(info.entrypoint, test, testPath, dockerMocha, (err, result) =>
+        DockerManager.StopAndRemoveContainers(test, dockerMocha, () =>
         {
-            if(err > 0)
-                console.error("Test Failed: " + test);
-            else
-                console.info("Test Passed: " + test);
-
-            console.log(err);
-            console.log(result);
-
-            DockerManager.stopEnvironment(test, exitState, dockerMocha, () =>
+            DockerManager.restoreState(state, test, dockerMocha, (info) =>
             {
-                callback(err);
-            });
+                DockerManager.runTest(info.entrypoint, test, testPath, dockerMocha, (err, result) =>
+                {
+                    if (err > 0)
+                        console.error("Test Failed: " + test);
+                    else
+                        console.info("Test Passed: " + test);
+
+                    console.log(err);
+                    console.log(result);
+
+                    DockerManager.stopEnvironment(test, exitState, dockerMocha, () =>
+                    {
+                        callback(err);
+                    });
+                })
+            })
         })
     })
 }
