@@ -41,9 +41,9 @@ DockerManager.deleteAllStates = function(dockerMocha, callback)
         async.mapSeries(services,
             (service, callback) =>
             {
-                console.log("Deleting all states", `'docker rmi $(docker images --filter=reference=${service.image}:${service.tag}[A-Za-z0-9][A-Za-z0-9]* -q) -f'`);
+                console.log("Deleting all states", `'docker images | grep ${service.image} | tr -s ' ' | cut -d ' ' -f 2 | grep -v ${service.tag}$ | xargs -I {} docker rmi ${service.image}:{} -f'`);
 
-                childProcess.exec(`docker rmi $(docker images --filter=reference=${service.image}:${service.tag}[A-Za-z0-9][A-Za-z0-9]* -q) -f`,
+                childProcess.exec(`docker images | grep ${service.image}| tr -s ' ' | cut -d ' ' -f 2 | grep -v ${service.tag}$ | xargs -I {} docker rmi ${service.image}:{} -f`,
                     (err, result) =>
                     {
                         callback();

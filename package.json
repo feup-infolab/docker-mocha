@@ -1,6 +1,6 @@
 {
   "name": "@feup-infolab/docker-mocha",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Running mocha tests in isolated, parallel and cached environments",
   "keywords": [
     "docker",
@@ -31,7 +31,7 @@
     "codacy-coverage": "^3.4.0"
   },
   "scripts": {
-    "test": "cp docker-mocha-run.js ./test/docker-mocha-run.js && cp src/* ./test/src && node ./docker-mocha-run.js -f ./test/test/tests.json -t 2 -c ./test/docker-compose.yml -e dendro -p 3000 --config docker_mocha",
+    "test": "cp docker-mocha-run.js ./test/docker-mocha-run.js && mkdir ./test/src; cp src/* ./test/src && node ./docker-mocha-run.js -f ./test/test/tests.json -t 2 -c ./test/docker-compose.yml -e dendro -p 3000 --config docker_mocha; rm ./test/docker-mocha-run.js; rm -rf ./test/src/ ",
     "coverage": "nyc --temp-directory=coverage --reporter=lcov npm test",
     "report-coverage": "node ./node_modules/.bin/codacy-coverage < ./coverage/lcov.info"
   },
