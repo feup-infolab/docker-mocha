@@ -1,6 +1,6 @@
 {
   "name": "@feup-infolab/docker-mocha",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Running mocha tests in isolated, parallel and cached environments",
   "keywords": [
     "docker",
