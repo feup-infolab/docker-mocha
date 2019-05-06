@@ -409,9 +409,9 @@ function createState(state, callback)
 {
     let stateParent = dockerMocha.getStateParent(state);
 
-    DockerManager.RemoveNetworks(state, dockerMocha, () =>
+    DockerManager.StopAndRemoveContainers(state, dockerMocha, () =>
     {
-        DockerManager.StopAndRemoveContainers(state, dockerMocha, () =>
+        DockerManager.RemoveNetworks(state, dockerMocha, () =>
         {
             DockerManager.restoreState(state, state, dockerMocha, (info) =>
             {
@@ -435,9 +435,9 @@ function runTest(test, callback)
     else
         exitState = state;
 
-    DockerManager.RemoveNetworks(state, dockerMocha, () =>
+    DockerManager.StopAndRemoveContainers(state, dockerMocha, () =>
     {
-        DockerManager.StopAndRemoveContainers(test, dockerMocha, () =>
+        DockerManager.restoreState(test, dockerMocha, () =>
         {
             DockerManager.restoreState(state, test, dockerMocha, (info) =>
             {
