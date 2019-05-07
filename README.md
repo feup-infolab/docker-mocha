@@ -13,7 +13,7 @@ With Setup Caching (Dissertation Nuno Neto)
 Docker-Mocha is a npm package developed in order to optimize a very characteristic set of test environments.
 Environments with a considerable ammount of service/end-to-end tests and with setup dependencies. In a normal execution these test suites would run in the host machine, single threaded and with multiple recreations of previous test setup states. The resulting unoptimized pipeline might provide undisired execution times.
 
-Docker-Mocha solves this problem by creating a test dependency tree, each test is executed in a isolated docker environment with its own network. By having isolation, it is possible to run the whole suite in a paralel environment. Additionaly, every setup state is saved (cached) in order for the sucessor test to load and execute more quickly. 
+Docker-Mocha solves this problem by using isolated docker environments with its own network. Each test will run in one of these docker environments. By having isolation, it is possible to run the whole suite in paralel. Additionaly, every setup state is saved (cached) in order for the sucessor test to load and execute more quickly. 
 
 These set of charactericstis allow to improve the overall execution time of the test suite.
 
@@ -27,34 +27,47 @@ These set of charactericstis allow to improve the overall execution time of the 
 This module only supports **mocha** tests. No windows support is available either given the design architecture of docker in windows (see [this](https://github.com/feup-infolab/docker-mocha/wiki/Windows-Support)).
 
 ## Setup
-To setup docker-mocha the users need to first verify that the requirments are met. Then install it via ```npm install docker-mocha```. Additional setup steps are required as it follows:
+To setup docker-mocha the users need to first verify that the requirments are met. Then install it via ```npm install @feup-infolab/docker-mocha```. Additional setup steps are required as it follows:
 
 ### Tests file
-The users must create a ```tests.json``` file where they list all the tests by file. Each test must have the following parameters:
+The users must create a ```tests.json``` file where they list all the setups and tests. Each setup and test must have a specific set of paramethers as well as a **unique identifier string**:
 
+Additional paramethers for each **setup**
 Parameter | Description
 --------- | -----------
-name | Name of the test and state, must be unique and cannot contain spaces
-parent | Identifier of the parent state it deppends on. If root, leave it ```null```
-test | the relative path of the test file, from the project root. It **cannot** be ```null```
-setup | the relative path of the setup file, from the project root. It can be ```null```
-init | the relative path of the init file, from the project root. It can be ```null```
+depends_on | Identifier of the parent state it deppends on. If root, leave it ```null```
+path | the relative path of the setup file, from the project root. It can be ```null```
+
+Additional paramethers for each **test**
+Parameter | Description
+--------- | -----------
+state | Identifier of the state it deppends on. It **cannot** be ```null```
+path | the relative path of the test file, from the project root. It **cannot** be ```null```
 
 ####  Example 
 
 ```json
-[
-  {"name": "init",       "parent": null,       "test": "test/init.js",              "setup": null,                        "init": null},
-  {"name": "testDollar", "parent": "setDollar","test": "test/dollar/testDollar.js", "setup": "setup/dollar/setDollar.js", "init": null},
-  {"name": "setDollar",  "parent": "init",     "test": "test/dollar/setDollar.js",  "setup": "setup/init.js",             "init": null},
-  {"name": "setPound",   "parent": "init",     "test": "test/pound/setPound.js",    "setup": "setup/init.js",             "init": null},
-  {"name": "testPound",  "parent": "setPound", "test": "test/pound/testPound.js",   "setup": "setup/pound/setPound.js",   "init": null}
-]
+{
+  "states":
+  {
+    "init": {"depends_on": null, "path": null},
+    "setDollar": {"depends_on": "init", "path": "setup/init.js"},
+    "setPound": {"depends_on": "init", "path": "setup/init.js"},
+    "testDollar": {"depends_on": "setDollar", "path": "setup/dollar/setDollar.js"},
+    "testPound": {"depends_on": "setPound", "path": "setup/pound/setPound.js"}
+  },
+  "tests":
+  {
+    "init": {"state": "init", "path": "test/init.js"},
+    "setDollar": {"state": "setDollar", "path": "test/dollar/setDollar.js"},
+    "setPound": {"state": "setPound", "path": "test/pound/setPound.js"},
+    "testDollar": {"state": "testDollar", "path": "test/dollar/testDollar.js"},
+    "testPound": {"state": "testPound", "path": "test/pound/testPound.js"}
+  }
+}
 ```
 
 For each test, if the state for it does not exist, it will use the parent state, run the setup and execute the test. If the state already exists, then the setup will not be executed.
-
-The init files will always be executed since the root to the current test.
 
 ### Compose file
 This module makes heavy use of docker in order to work. Also, in order to isolate the test environment it requires a valid ```docker-compose.yml```. Version 3.5 or above is required. The users will initially design the environment needed to mount the whole platform environment. If there is already a compose file for the platform, then the recommended is to create a copy only for docker-mocha. After creating or copying the file, the compose file must obey a set of rules and alterations:
@@ -105,6 +118,7 @@ To run docker-mocha the users simply need to invoke ```docker-mocha``` in the pr
 ```--threads``` | ```-t``` | int | The maximum ammount of tests running in parallel. | **4**
 ```--entrypoint``` | ```-e``` | string | The name of the services in which the tests will be executed. | project name in package.json
 ```--port``` | ```-p``` | int | The port of the entrypoint service. The execution only continues when the entrypoint + port specified are up | **3000**
+```--config``` | | string | A specificic config environment variable that it will be passed to the setup and tests in runtime | (undefined) |
 
 ### Flags
 Flag | Description 
