@@ -33,12 +33,14 @@ To setup docker-mocha the users need to first verify that the requirments are me
 The users must create a ```tests.json``` file where they list all the setups and tests. Each setup and test must have a specific set of paramethers as well as a **unique identifier string**:
 
 Additional paramethers for each **setup**
+
 Parameter | Description
 --------- | -----------
 depends_on | Identifier of the parent state it deppends on. If root, leave it ```null```
 path | the relative path of the setup file, from the project root. It can be ```null```
 
 Additional paramethers for each **test**
+
 Parameter | Description
 --------- | -----------
 state | Identifier of the state it deppends on. It **cannot** be ```null```
