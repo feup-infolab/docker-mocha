@@ -3,8 +3,42 @@ const async = require("async");
 const vanillaString = "";
 const Utils = require('./utils');
 const os = require("os");
+const request = require("request");
+const _ = require("underscore");
 
 const DockerManager = function () {};
+
+function validIP(ipaddress) {
+    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {
+        return (true)
+    }
+    return (false)
+}
+
+const logEverythingFromChildProcess = function (childProcess)
+{
+    childProcess.stdout.on("data", function (data)
+    {
+        console.log(data);
+    });
+
+    childProcess.stderr.on("data", function (data)
+    {
+        console.log(data);
+    });
+
+    childProcess.on("exit", function (code)
+    {
+        if (!code)
+        {
+            console.log("Process " + childProcess.cmd + " exited successfully (code 0). ");
+        }
+        else
+        {
+            console.log("Process " + childProcess.cmd + " exited with non-zero exit code (code " + code + ".");
+        }
+    });
+};
 
 /**
  * Gets information about services for the corresponding orchestra
@@ -43,11 +77,13 @@ DockerManager.deleteAllStates = function(dockerMocha, callback)
             {
                 console.log("Deleting all states", `'docker images | grep ${service.image} | tr -s ' ' | cut -d ' ' -f 2 | grep -v ${service.tag}$ | xargs -I {} docker rmi ${service.image}:{} -f'`);
 
-                childProcess.exec(`docker images | grep ${service.image}| tr -s ' ' | cut -d ' ' -f 2 | grep -v ${service.tag}$ | xargs -I {} docker rmi ${service.image}:{} -f`,
+                const newProcess = childProcess.exec(`docker images | grep ${service.image}| tr -s ' ' | cut -d ' ' -f 2 | grep -v ${service.tag}$ | xargs -I {} docker rmi ${service.image}:{} -f`,
                     (err, result) =>
                     {
                         callback();
                     })
+
+                logEverythingFromChildProcess(newProcess);
             },
             (err, results)=>
             {
@@ -61,44 +97,52 @@ DockerManager.StopAndRemoveContainers = function(environment, dockerMocha, callb
 {
     console.log("Stopping and Removing all containers");
 
-    childProcess.exec(`docker rm $(docker stop $(docker ps -a -q --filter name="${environment}.*"))`,
+    const newProcess = childProcess.exec(`docker rm $(docker stop $(docker ps -a -q --filter name="${environment}.*"))`,
         (err, result) =>
         {
             callback();
         })
+
+    logEverythingFromChildProcess(newProcess);
 };
 
 DockerManager.RemoveNetworks = function(environment, dockerMocha, callback)
 {
     console.log("Removing Networks");
 
-    childProcess.exec(`docker network rm $(docker network ls -q --filter name="${environment}")`,
+    const newProcess = childProcess.exec(`docker network rm $(docker network ls -q --filter name="${environment}")`,
         (err, result) =>
         {
             callback();
         })
+
+    logEverythingFromChildProcess(newProcess);
 };
 
 DockerManager.stopAllContainers = function(callback)
 {
     console.log("Stopping all containers", "'docker stop $(docker ps -a -q)'");
 
-    childProcess.exec('docker stop $(docker ps -a -q)',
+    const newProcess = childProcess.exec('docker stop $(docker ps -a -q)',
         (err, result) =>
         {
             callback();
         })
+
+    logEverythingFromChildProcess(newProcess);
 };
 
 DockerManager.removeAllContainers = function(callback)
 {
     console.log("Removing all containers", "'docker rm $(docker ps -a -q)'");
 
-    childProcess.exec('docker rm $(docker ps -a -q)',
+    const newProcess = childProcess.exec('docker rm $(docker ps -a -q)',
         (err, result) =>
         {
             callback();
         })
+
+    logEverythingFromChildProcess(newProcess);
 };
 
 
@@ -107,12 +151,12 @@ DockerManager.removeAllVolumes = function(callback)
 {
     console.log("Removing all volumes", "'docker volume prune -f'");
 
-    childProcess.exec('docker volume prune -f',
+    const newProcess = childProcess.exec('docker volume prune -f',
         (err, result) =>
         {
             callback();
         })
-
+    logEverythingFromChildProcess(newProcess);
 };
 
 /**
@@ -256,9 +300,18 @@ DockerManager.startEnvironment = function(environment, state, dockerMocha, callb
         state = vanillaString;
     }
 
-    console.log("Starting environment: " + environment,`'export STATE='${state}' && export ENVIRONMENT='${environment}' && docker-compose -f '${dockerMocha.composeFile}' -p ${environment} up -d'` );
+    console.log("Starting environment: " + environment,`docker-compose -f '${dockerMocha.composeFile}' -p ${environment} up -d` );
 
-    childProcess.exec(`export STATE='${state}' && export ENVIRONMENT='${environment}' && docker-compose -f '${dockerMocha.composeFile}' -p ${environment} up -d`,
+    let copyOfEnv = JSON.parse(JSON.stringify(process.env));
+    _.extend(copyOfEnv, {
+        STATE: state,
+        ENVIRONMENT: environment
+    });
+
+    const newProcess = childProcess.exec(`docker-compose -f '${dockerMocha.composeFile}' -p ${environment} up -d`,
+        {
+            env: copyOfEnv
+        },
         (err, result) =>
         {
             console.log("STARTENVIRONMENT: ", err, result);
@@ -268,6 +321,8 @@ DockerManager.startEnvironment = function(environment, state, dockerMocha, callb
 
             callback(info);
         })
+
+    logEverythingFromChildProcess(newProcess);
 };
 /**
  *
@@ -282,12 +337,14 @@ DockerManager.saveEnvironment = function(environment, dockerMocha, callback)
             (service, callback) => {
                 console.log("Saving state: " + environment, `'docker commit ${environment}.${service.name} ${service.image}:${service.tag}${environment}'`);
 
-                childProcess.exec(`docker commit ${environment}.${service.name} ${service.image}:${service.tag}${environment}`,
+                const newProcess = childProcess.exec(`docker commit ${environment}.${service.name} ${service.image}:${service.tag}${environment}`,
                     (err, result) =>
                     {
                         console.log("SAVESTATE: ", err, result);
                         callback();
                     })
+
+                logEverythingFromChildProcess(newProcess);
             },
             (err, results) => {
                 callback();
@@ -304,12 +361,14 @@ DockerManager.stopEnvironment = function(environment, state, dockerMocha, callba
 
     console.log("Stopping state: " + state, `'export STATE='${state}' && export ENVIRONMENT='${environment}' && docker-compose -f '${dockerMocha.composeFile}' -p ${environment} down'`);
 
-    childProcess.exec(`export STATE='${state}' && export ENVIRONMENT='${environment}' && docker-compose -f '${dockerMocha.composeFile}' -p ${environment}  down`,
+    const newProcess = childProcess.exec(`export STATE='${state}' && export ENVIRONMENT='${environment}' && docker-compose -f '${dockerMocha.composeFile}' -p ${environment}  down`,
         (err, result) =>
         {
             console.log("STOPENVIRONMENT: ", err, result);
             callback(err);
         })
+
+    logEverythingFromChildProcess(newProcess);
 };
 
 /**
@@ -338,7 +397,7 @@ DockerManager.checkIfStateExists = function(state, dockerMocha, callback)
                 {
                     console.log("Checking if state exists: " + state, `'docker image inspect "${service.image}:${service.tag}${state}"'`);
 
-                    childProcess.exec(`docker image inspect "${service.image}:${service.tag}${state}"`,
+                    const newProcess = childProcess.exec(`docker image inspect "${service.image}:${service.tag}${state}"`,
                         (err, result) =>
                         {
                             if(!err && result)
@@ -350,6 +409,8 @@ DockerManager.checkIfStateExists = function(state, dockerMocha, callback)
                                 callback(null, false);
                             }
                         })
+
+                    logEverythingFromChildProcess(newProcess);
                 },
                 (err, results)=>
                 {
@@ -438,10 +499,12 @@ DockerManager.runTest = function(container, test, testPath, dockerMocha, callbac
  */
 DockerManager.getContainerIP = function(container, callback)
 {
-    childProcess.exec(`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${container}`,
+    const newProcess = childProcess.exec(`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${container}`,
         (err, result) => {
             callback(null, result.slice(0, -1));
         })
+
+    logEverythingFromChildProcess(newProcess);
 };
 
 DockerManager.waitForConnection = function(container, port, callback)
@@ -450,25 +513,36 @@ DockerManager.waitForConnection = function(container, port, callback)
 
     DockerManager.getContainerIP(container, (err, ip) =>
     {
-        DockerManager.loopUp(ip, port, ()=>
+        if(!err && validIP(ip))
         {
-            callback();
-        })
+            DockerManager.loopUp(ip, port, ()=>
+            {
+                callback();
+            })
+        }
+        else
+        {
+            DockerManager.waitForConnection(container, port, callback);
+        }
+
     })
 };
 
 DockerManager.loopUp = function(address, port, callback)
 {
-    //console.log(address, port);
+    console.log("Checking connectivity on " + address + ":" + port);
     DockerManager.checkConnection(address, port,
         (err) =>
         {
            if(err)
            {
-               DockerManager.loopUp(address, port, () =>
+               setTimeout(function()
                {
-                   callback();
-               })
+                   DockerManager.loopUp(address, port, () =>
+                   {
+                       callback();
+                   })
+               },1000);
            }
            else
            {
@@ -484,16 +558,49 @@ DockerManager.loopUp = function(address, port, callback)
  * @param port
  * @param callback
  */
-DockerManager.checkConnection = function(address, port, callback)
+DockerManager.checkConnection = function(address, port, callback, textToExpectOnSuccess)
 {
+    let fullUrl = "http://" + address;
+
+    if (port)
     {
-        childProcess.exec(`nc -z ${address} ${port}`,
-            (err, result) =>
-            {
-                //console.log(err, result);
-                callback(err);
-            })
+        fullUrl = fullUrl + ":" + port;
     }
+
+    request.get({
+        url: fullUrl,
+        timeout:500
+    },
+    function (e, r, data)
+    {
+        if (!e)
+        {
+            if (textToExpectOnSuccess && data.indexOf(textToExpectOnSuccess) > -1)
+            {
+                callback(null);
+            }
+            else if (!textToExpectOnSuccess)
+            {
+                callback(null);
+            }
+            else
+            {
+                callback(1, "Response not matched when checking for connectivity on " + address + " : " + port);
+            }
+        }
+        else
+        {
+            // consider empty response to be a success
+            if (e.code === "ECONNRESET" && textToExpectOnSuccess === "")
+            {
+                callback(null);
+            }
+            else
+            {
+                callback(1, "Unable to contact Server at " + address + " : " + port);
+            }
+        }
+    });
 };
 
 /**
@@ -505,7 +612,7 @@ DockerManager.checkConnection = function(address, port, callback)
  */
 DockerManager.runCommand = function(container, cmd, callback)
 {
-    childProcess.exec(`docker exec ${container} ${cmd}`,
+    const newProcess = childProcess.exec(`docker exec ${container} ${cmd}`,
         (err, result) =>
         {
             if(Utils.isNull(err))
@@ -513,6 +620,8 @@ DockerManager.runCommand = function(container, cmd, callback)
             else
                 callback(err.code, result);
         })
+
+    logEverythingFromChildProcess(newProcess);
 };
 
 
