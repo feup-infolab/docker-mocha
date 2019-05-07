@@ -8,6 +8,7 @@ const fs = require("fs");
 const yaml = require("js-yaml");
 const Utils = require("./src/utils");
 const Queue = require('better-queue');
+const ExportToCsv = require('export-to-csv').ExportToCsv;
 
 const defaultFileName = "tests.json";
 const defaultFile = path.join(process.cwd(), defaultFileName);
@@ -37,6 +38,22 @@ let startTime;
 let finishTime;
 
 let queue;
+
+const csvOptions = {
+    fieldSeparator: ',',
+    quoteStrings: '"',
+    decimalSeparator: '.',
+    showLabels: true,
+    showTitle: true,
+    title: 'Docker-Mocha Details',
+    useTextFile: false,
+    useBom: true,
+    useKeysAsHeaders: true,
+};
+
+const csvExporter = new ExportToCsv(csvOptions);
+
+let data = [];
 
 for(let i in process.argv)
 {
@@ -401,6 +418,17 @@ function manager()
         //console.log("Docker Mocha skipped " + ((Object.keys(dockerMocha.testsMap).length) - (passedTests+failedTests)) + " tests");
         console.log("Execution finished in " + hours + " hour(s), " + minutes + " minute(s) and " + seconds + " seconds");
 
+        data.push({
+            state: '',
+            stateTime: '',
+            test: '',
+            testTime: '',
+            total: res
+        });
+
+        const csvData = csvExporter.generateCsv(data, true);
+        fs.writeFileSync('data.csv', csvData);
+
         process.exit(0);
     })
 }
@@ -411,6 +439,8 @@ function createState(state, callback)
 
     let stateParent = dockerMocha.getStateParent(state);
 
+    const startDateState = new Date();
+
     DockerManager.StopAndRemoveContainers(state, dockerMocha, () =>
     {
         DockerManager.RemoveNetworks(state, dockerMocha, () =>
@@ -419,6 +449,16 @@ function createState(state, callback)
             {
                 DockerManager.stopEnvironment(state, stateParent, dockerMocha, (err) =>
                 {
+                    const stopDateState = new Date();
+
+                    data.push({
+                        state: state,
+                        stateTime: Math.abs(stopDateState - startDateState) / 1000,
+                        test: '',
+                        testTime: '',
+                        total: '',
+                    });
+
                     callback(err);
                 });
             });
@@ -439,6 +479,8 @@ function runTest(test, callback)
     else
         exitState = state;
 
+    const startDateTest = new Date();
+
     DockerManager.StopAndRemoveContainers(state, dockerMocha, () =>
     {
         DockerManager.RemoveNetworks(test, dockerMocha, () =>
@@ -457,6 +499,16 @@ function runTest(test, callback)
 
                     DockerManager.stopEnvironment(test, exitState, dockerMocha, () =>
                     {
+                        const stopDateTest = new Date();
+
+                        data.push({
+                            state: '',
+                            stateTime: '',
+                            test: test,
+                            testTime: Math.abs(stopDateTest - startDateTest) / 1000,
+                            total: ''
+                        });
+
                         callback(err);
                     });
                 })

@@ -1,6 +1,6 @@
 {
   "name": "@feup-infolab/docker-mocha",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Running mocha tests in isolated, parallel and cached environments",
   "keywords": [
     "docker",
@@ -22,11 +22,11 @@
   "dependencies": {
     "async": "^2.6.2",
     "better-queue": "^3.8.10",
+    "export-to-csv": "^0.2.1",
     "js-yaml": "^3.12.2",
     "yargs": "^13.2.2"
   },
   "devDependencies": {
-    "mocha": "^5.1.1",
     "nyc": "^13.3.0",
     "codacy-coverage": "^3.4.0"
   },
