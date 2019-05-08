@@ -459,11 +459,22 @@ DockerManager.runSetup = function(container, state, dockerMocha, callback)
 
     console.log("Running setup in: " + container, `'docker exec ${container} node ${setupPath} ${configOption}'`);
 
+    /*
     DockerManager.runCommand(container, `node ${setupPath} ${configOption}`, (err, result) =>
     {
         console.log("RUNSETUP", err, result);
         callback(err, result);
     });
+    */
+
+    const newProcess = childProcess.exec(`docker exec -e DOCKER_MOCHA_ENV=true ${container}  node ${setupPath} ${configOption}`,
+        (err, result) =>
+        {
+            //console.log("RUNSETUP", err, result);
+            callback(err, result);
+        });
+
+    logEverythingFromChildProcess(newProcess);
 };
 
 
@@ -496,11 +507,23 @@ DockerManager.runTest = function(container, test, testPath, dockerMocha, callbac
 
     console.log("Running test: " + test, `'docker exec ${container} ./node_modules/mocha/bin/mocha  ${testPath} ${configOption}'`);
 
+
+    /*
     DockerManager.runCommand(container, `./node_modules/mocha/bin/mocha  ${testPath} ${configOption}`, (err, result) =>
     {
         console.log("RUNTESET", err, result);
         callback(err, result);
-    })
+    });
+    */
+
+    const newProcess = childProcess.exec(`docker exec -e DOCKER_MOCHA_ENV=true ${container} ./node_modules/mocha/bin/mocha  ${testPath} ${configOption}`,
+        (err, result) =>
+        {
+            //console.log("RUNTESET", err, result);
+            callback(err, result);
+        });
+
+    logEverythingFromChildProcess(newProcess);
 };
 
 /**

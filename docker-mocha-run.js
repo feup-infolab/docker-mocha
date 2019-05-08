@@ -55,6 +55,7 @@ const csvExporter = new ExportToCsv(csvOptions);
 
 let data = [];
 
+
 for(let i in process.argv)
 {
     //Check if file flag exists
@@ -507,8 +508,8 @@ function runTest(test, callback)
                     else
                         console.info("Test Passed: " + test);
 
-                    console.log(err);
-                    console.log(result);
+                    //console.log(err);
+                    //console.log(result);
 
                     DockerManager.logEntrypoint(info.entrypoint, dockerMocha, () =>
                     {

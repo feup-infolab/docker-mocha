@@ -5,14 +5,23 @@ function runSetup(loaderClass)
 {
     return new Promise(function(resolve, reject)
     {
+
+        console.log("here", process.env.DOCKER_MOCHA_ENV);
+
         async.series([
             function (callback)
             {
-                loaderClass.init(callback);
+                if(process.env.DOCKER_MOCHA_ENV)
+                    loaderClass.init(callback);
+                else
+                    callback(null);
             },
             function (callback)
             {
-                loaderClass.load(callback);
+                if(process.env.DOCKER_MOCHA_ENV)
+                    loaderClass.load(callback);
+                else
+                    callback(null);
             },
         ], function (err, result) {
             if (!err) {
