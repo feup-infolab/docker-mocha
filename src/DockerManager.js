@@ -421,7 +421,7 @@ DockerManager.checkIfStateExists = function(state, dockerMocha, callback)
                             }
                         });
 
-                    logEverythingFromChildProcess(newProcess);
+                    // logEverythingFromChildProcess(newProcess);
                 },
                 (err, results)=>
                 {
@@ -515,7 +515,7 @@ DockerManager.getContainerIP = function(container, callback)
             callback(null, result.slice(0, -1));
         });
 
-    logEverythingFromChildProcess(newProcess);
+    // logEverythingFromChildProcess(newProcess);
 };
 
 DockerManager.waitForConnection = function(container, port, callback)
