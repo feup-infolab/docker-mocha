@@ -549,7 +549,7 @@ DockerManager.waitForConnection = function(container, port, callback)
     {
         if(!err && validIP(ip))
         {
-            DockerManager.loopUp(ip, port, ()=>
+            DockerManager.loopUp(container, ip, port, ()=>
             {
                 callback();
             })
@@ -562,17 +562,17 @@ DockerManager.waitForConnection = function(container, port, callback)
     })
 };
 
-DockerManager.loopUp = function(address, port, callback)
+DockerManager.loopUp = function(container, address, port, callback)
 {
     console.log("Checking connectivity on " + address + ":" + port);
-    DockerManager.checkConnection(address, port,
+    DockerManager.checkConnection(container, address, port,
         (err) =>
         {
            if(err)
            {
                setTimeout(function()
                {
-                   DockerManager.loopUp(address, port, () =>
+                   DockerManager.loopUp(container, address, port, () =>
                    {
                        callback();
                    })
@@ -588,13 +588,17 @@ DockerManager.loopUp = function(address, port, callback)
 
 /**
  * Check network connection, different behaviour for windows and linux-based
+ * @param container
  * @param address
  * @param port
  * @param callback
- * @param textToExpectOnSuccess
  */
-DockerManager.checkConnection = function(address, port, callback, textToExpectOnSuccess)
+DockerManager.checkConnection = function(container, address, port, callback)
 {
+
+
+
+    /*
     let fullUrl = "http://" + address;
 
     if (port)
@@ -636,6 +640,16 @@ DockerManager.checkConnection = function(address, port, callback, textToExpectOn
             }
         }
     });
+    */
+
+    DockerManager.runCommand(container, `wget --tries=1 localhost:${port}`,
+        (err, result) =>
+        {
+            if(err === 0)
+                callback(null);
+            else
+                callback(err);
+        });
 };
 
 /**

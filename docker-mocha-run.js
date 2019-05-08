@@ -508,9 +508,6 @@ function runTest(test, callback)
                     else
                         console.info("Test Passed: " + test);
 
-                    //console.log(err);
-                    //console.log(result);
-
                     DockerManager.logEntrypoint(info.entrypoint, dockerMocha, () =>
                     {
                         DockerManager.stopEnvironment(test, exitState, dockerMocha, () =>
