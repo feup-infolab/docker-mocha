@@ -441,28 +441,38 @@ function createState(state, callback)
 
     const startDateState = new Date();
 
-    DockerManager.StopAndRemoveContainers(state, dockerMocha, () =>
+    DockerManager.checkIfStateExists(state, dockerMocha, (exists) =>
     {
-        DockerManager.RemoveNetworks(state, dockerMocha, () =>
+        if(exists)
         {
-            DockerManager.restoreState(state, state, dockerMocha, (info) =>
+            callback(0)
+        }
+        else
+        {
+            DockerManager.StopAndRemoveContainers(state, dockerMocha, () =>
             {
-                DockerManager.stopEnvironment(state, stateParent, dockerMocha, (err) =>
+                DockerManager.RemoveNetworks(state, dockerMocha, () =>
                 {
-                    const stopDateState = new Date();
+                    DockerManager.restoreState(state, state, dockerMocha, (info) =>
+                    {
+                        DockerManager.stopEnvironment(state, stateParent, dockerMocha, (err) =>
+                        {
+                            const stopDateState = new Date();
 
-                    data.push({
-                        state: state,
-                        stateTime: Math.abs(stopDateState - startDateState) / 1000,
-                        test: '',
-                        testTime: '',
-                        total: '',
+                            data.push({
+                                state: state,
+                                stateTime: Math.abs(stopDateState - startDateState) / 1000,
+                                test: '',
+                                testTime: '',
+                                total: '',
+                            });
+
+                            callback(err);
+                        });
                     });
-
-                    callback(err);
-                });
-            });
-        })
+                })
+            })
+        }
     })
 }
 
