@@ -81,7 +81,7 @@ DockerManager.deleteAllStates = function(dockerMocha, callback)
                     (err, result) =>
                     {
                         callback();
-                    })
+                    });
 
                 logEverythingFromChildProcess(newProcess);
             },
@@ -101,7 +101,7 @@ DockerManager.StopAndRemoveContainers = function(environment, dockerMocha, callb
         (err, result) =>
         {
             callback();
-        })
+        });
 
     logEverythingFromChildProcess(newProcess);
 };
@@ -114,7 +114,7 @@ DockerManager.RemoveNetworks = function(environment, dockerMocha, callback)
         (err, result) =>
         {
             callback();
-        })
+        });
 
     logEverythingFromChildProcess(newProcess);
 };
@@ -127,7 +127,7 @@ DockerManager.stopAllContainers = function(callback)
         (err, result) =>
         {
             callback();
-        })
+        });
 
     logEverythingFromChildProcess(newProcess);
 };
@@ -140,7 +140,7 @@ DockerManager.removeAllContainers = function(callback)
         (err, result) =>
         {
             callback();
-        })
+        });
 
     logEverythingFromChildProcess(newProcess);
 };
@@ -155,7 +155,7 @@ DockerManager.removeAllVolumes = function(callback)
         (err, result) =>
         {
             callback();
-        })
+        });
     logEverythingFromChildProcess(newProcess);
 };
 
@@ -320,7 +320,7 @@ DockerManager.startEnvironment = function(environment, state, dockerMocha, callb
             info.entrypoint = environment + '.' + dockerMocha.entrypoint;
 
             callback(info);
-        })
+        });
 
     logEverythingFromChildProcess(newProcess);
 };
@@ -342,7 +342,7 @@ DockerManager.saveEnvironment = function(environment, dockerMocha, callback)
                     {
                         console.log("SAVESTATE: ", err, result);
                         callback();
-                    })
+                    });
 
                 logEverythingFromChildProcess(newProcess);
             },
@@ -366,7 +366,7 @@ DockerManager.stopEnvironment = function(environment, state, dockerMocha, callba
         {
             console.log("STOPENVIRONMENT: ", err, result);
             callback(err);
-        })
+        });
 
     logEverythingFromChildProcess(newProcess);
 };
@@ -408,7 +408,7 @@ DockerManager.checkIfStateExists = function(state, dockerMocha, callback)
                             {
                                 callback(null, false);
                             }
-                        })
+                        });
 
                     logEverythingFromChildProcess(newProcess);
                 },
@@ -502,7 +502,7 @@ DockerManager.getContainerIP = function(container, callback)
     const newProcess = childProcess.exec(`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${container}`,
         (err, result) => {
             callback(null, result.slice(0, -1));
-        })
+        });
 
     logEverythingFromChildProcess(newProcess);
 };
@@ -557,6 +557,7 @@ DockerManager.loopUp = function(address, port, callback)
  * @param address
  * @param port
  * @param callback
+ * @param textToExpectOnSuccess
  */
 DockerManager.checkConnection = function(address, port, callback, textToExpectOnSuccess)
 {
@@ -619,7 +620,7 @@ DockerManager.runCommand = function(container, cmd, callback)
                 callback(0, result);
             else
                 callback(err.code, result);
-        })
+        });
 
     logEverythingFromChildProcess(newProcess);
 };
