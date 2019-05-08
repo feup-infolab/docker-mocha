@@ -5,9 +5,6 @@ function runSetup(loaderClass)
 {
     return new Promise(function(resolve, reject)
     {
-
-        console.log("here", process.env.DOCKER_MOCHA_ENV);
-
         async.series([
             function (callback)
             {
