@@ -371,6 +371,17 @@ DockerManager.stopEnvironment = function(environment, state, dockerMocha, callba
     logEverythingFromChildProcess(newProcess);
 };
 
+DockerManager.logEntrypoint = function(entrypoint, dockerMocha, callback)
+{
+    const newProcess = childProcess.exec(`docker logs ${entrypoint}`,
+      (err, result) =>
+      {
+          callback(err);
+      });
+
+    logEverythingFromChildProcess(newProcess);
+};
+
 /**
  * Verifies the existence of a given state. Returns true or false accordingly.
  * @param state

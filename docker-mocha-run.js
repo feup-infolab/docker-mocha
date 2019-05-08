@@ -455,19 +455,22 @@ function createState(state, callback)
                 {
                     DockerManager.restoreState(state, state, dockerMocha, (info) =>
                     {
-                        DockerManager.stopEnvironment(state, stateParent, dockerMocha, (err) =>
+                        DockerManager.logEntrypoint(info.entrypoint, dockerMocha, () =>
                         {
-                            const stopDateState = new Date();
+                            DockerManager.stopEnvironment(state, stateParent, dockerMocha, (err) =>
+                            {
+                                const stopDateState = new Date();
 
-                            data.push({
-                                state: state,
-                                stateTime: Math.abs(stopDateState - startDateState) / 1000,
-                                test: '',
-                                testTime: '',
-                                total: '',
+                                data.push({
+                                    state: state,
+                                    stateTime: Math.abs(stopDateState - startDateState) / 1000,
+                                    test: '',
+                                    testTime: '',
+                                    total: '',
+                                });
+
+                                callback(err);
                             });
-
-                            callback(err);
                         });
                     });
                 })
@@ -507,19 +510,22 @@ function runTest(test, callback)
                     console.log(err);
                     console.log(result);
 
-                    DockerManager.stopEnvironment(test, exitState, dockerMocha, () =>
+                    DockerManager.logEntrypoint(info.entrypoint, dockerMocha, () =>
                     {
-                        const stopDateTest = new Date();
+                        DockerManager.stopEnvironment(test, exitState, dockerMocha, () =>
+                        {
+                            const stopDateTest = new Date();
 
-                        data.push({
-                            state: '',
-                            stateTime: '',
-                            test: test,
-                            testTime: Math.abs(stopDateTest - startDateTest) / 1000,
-                            total: ''
+                            data.push({
+                                state: '',
+                                stateTime: '',
+                                test: test,
+                                testTime: Math.abs(stopDateTest - startDateTest) / 1000,
+                                total: ''
+                            });
+
+                            callback(err);
                         });
-
-                        callback(err);
                     });
                 })
             })
