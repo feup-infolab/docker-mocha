@@ -301,7 +301,7 @@ DockerManager.startEnvironment = function(environment, state, dockerMocha, callb
         state = vanillaString;
     }
 
-    console.log("Starting environment: " + environment,`docker-compose -f '${dockerMocha.composeFile}' -p ${environment} up -d` );
+    console.log(`Starting environment: ${environment} with state ${state}. docker-compose -f '${dockerMocha.composeFile}' -p ${environment} up -d` );
 
     let copyOfEnv = JSON.parse(JSON.stringify(process.env));
     _.extend(copyOfEnv, {
@@ -315,7 +315,8 @@ DockerManager.startEnvironment = function(environment, state, dockerMocha, callb
         },
         (err, result) =>
         {
-            console.log("STARTENVIRONMENT: ", err, result);
+            if(err)
+              console.log("STARTENVIRONMENT: ", err, result);
 
             let info = {};
             info.entrypoint = environment + '.' + dockerMocha.entrypoint;
@@ -344,11 +345,13 @@ DockerManager.saveEnvironment = function(environment, dockerMocha, callback)
                 const newProcess = childProcess.exec(`docker commit ${environment}.${service.name} ${service.image}:${service.tag}${environment}`,
                     (err, result) =>
                     {
-                        console.log("SAVESTATE: ", err, result);
+                        if(err)
+                          console.log("SAVESTATE: ", err, result);
+
                         callback();
                     });
 
-                logEverythingFromChildProcess(newProcess);
+                // logEverythingFromChildProcess(newProcess);
             },
             (err, results) => {
                 callback();
@@ -368,11 +371,13 @@ DockerManager.stopEnvironment = function(environment, state, dockerMocha, callba
     const newProcess = childProcess.exec(`export STATE='${state}' && export ENVIRONMENT='${environment}' && docker-compose -f '${dockerMocha.composeFile}' -p ${environment}  down`,
         (err, result) =>
         {
-            console.log("STOPENVIRONMENT: ", err, result);
+            if(err)
+              console.log("STOPENVIRONMENT: ", err, result);
+
             callback(err);
         });
 
-    logEverythingFromChildProcess(newProcess);
+    // logEverythingFromChildProcess(newProcess);
 };
 
 DockerManager.logEntrypoint = function(entrypoint, dockerMocha, callback)
