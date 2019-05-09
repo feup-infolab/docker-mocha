@@ -86,7 +86,7 @@ DockerManager.deleteAllStates = function(dockerMocha, callback)
                         callback();
                     });
 
-                logEverythingFromChildProcess(newProcess);
+                // logEverythingFromChildProcess(newProcess);
             },
             (err, results)=>
             {
@@ -106,7 +106,7 @@ DockerManager.StopAndRemoveContainers = function(environment, dockerMocha, callb
             callback();
         });
 
-    logEverythingFromChildProcess(newProcess);
+    // logEverythingFromChildProcess(newProcess);
 };
 
 DockerManager.RemoveNetworks = function(environment, dockerMocha, callback)
@@ -119,7 +119,7 @@ DockerManager.RemoveNetworks = function(environment, dockerMocha, callback)
             callback();
         });
 
-    logEverythingFromChildProcess(newProcess);
+    // logEverythingFromChildProcess(newProcess);
 };
 
 DockerManager.stopAllContainers = function(callback)
@@ -132,7 +132,7 @@ DockerManager.stopAllContainers = function(callback)
             callback();
         });
 
-    logEverythingFromChildProcess(newProcess);
+    // logEverythingFromChildProcess(newProcess);
 };
 
 DockerManager.removeAllContainers = function(callback)
@@ -145,7 +145,7 @@ DockerManager.removeAllContainers = function(callback)
             callback();
         });
 
-    logEverythingFromChildProcess(newProcess);
+    // logEverythingFromChildProcess(newProcess);
 };
 
 
@@ -159,7 +159,7 @@ DockerManager.removeAllVolumes = function(callback)
         {
             callback();
         });
-    logEverythingFromChildProcess(newProcess);
+    // logEverythingFromChildProcess(newProcess);
 };
 
 /**

@@ -1,7 +1,7 @@
 {
   "states":
   {
-    "init": {"depends_on": null, "path": null},
+    "init": {"depends_on": null, "path": "setup/initZero.js"},
     "setDollar": {"depends_on": "init", "path": "setup/init.js"},
     "setPound": {"depends_on": "init", "path": "setup/init.js"},
     "testDollar": {"depends_on": "setDollar", "path": "setup/dollar/setDollar.js"},

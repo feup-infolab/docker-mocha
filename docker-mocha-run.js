@@ -341,13 +341,88 @@ else if(setuping)
 
     console.log(`Setting up state ${loaderClass.name} from file ${trimmedOverrideFile}`);
 
-    async.series([
-      loaderClass.init,
-      loaderClass.load,
-      loaderClass.shutdown
-    ], function(err, results){
 
-    });
+    let result;
+    let error;
+    let timeoutArmed = false;
+    let taskTimeout;
+    let sleepTimeout;
+
+    const timeout = function(callback)
+    {
+        taskTimeout = setTimeout(
+            function()
+            {
+                console.log("Arrived at timeout at  " + loaderClass.name);
+                if(!result)
+                {
+                    console.log("Task timed out during setup operation of " + loaderClass.name);
+                    result = "timeout";
+                    callback();
+                }
+            },
+            6 * 1000
+        );
+    };
+
+    const performTasks = function(callback)
+    {
+        async.series([
+            loaderClass.init,
+            function(callback)
+            {
+                console.log("Ran INIT of " + loaderClass.name);
+                callback(null);
+            },
+            loaderClass.load,
+            function(callback)
+            {
+                console.log("Ran LOAD of " + loaderClass.name);
+                callback(null);
+            },
+            loaderClass.shutdown,
+            function(callback)
+            {
+                console.log("Ran SHUTDOWN of " + loaderClass.name);
+                callback(null);
+            }
+        ], function(err, results){
+            if(err)
+            {
+                result = "error";
+                error = err;
+            }
+            else
+            {
+                result = "ok";
+            }
+
+            console.log("Ran EVERYTHING of " + loaderClass.name + " with result " + result);
+
+            callback(err, results);
+            clearTimeout(taskTimeout);
+        });
+    };
+
+    async.race([
+        timeout,
+        performTasks
+    ]);
+
+    function sleep()
+    {
+        sleepTimeout = setTimeout(function() {
+            if(!result)
+            {
+                console.log('Operation sleeping...');
+                clearTimeout(sleepTimeout);
+                sleepTimeout = null;
+                sleep();
+            }
+        }, 100);
+    }
+
+    sleep();
 }
 else if(testing)
 {

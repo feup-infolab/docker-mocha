@@ -6,6 +6,8 @@ class SetPound
     static load(callback)
     {
         const pound = 0.86;
+        console.log("Body antes pound");
+
         request('http://localhost:' + port + '/add/pound?value=' + pound, {json:true}, (err, res, body) =>
         {
             console.log("Body aqui: ", body);

@@ -6,6 +6,7 @@ class SetDollar
     static load(callback)
     {
         const dollar = 1.13;
+        console.log("Body antes dollar");
         request('http://localhost:' + port + '/add/dollar?value=' + dollar, {json:true}, (err, res, body) =>
         {
             console.log("Body aqui: ", body);
