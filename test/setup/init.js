@@ -8,7 +8,7 @@ class Init
     {
         request('http://localhost:' + port + '/init', {json:true}, (err, res, body) =>
         {
-            console.log(body);
+            console.log("Body aqui: ", body);
             callback(null);
         })
     }
@@ -16,6 +16,12 @@ class Init
     static init(callback){callback(null)}
 }
 
-console.log("ARGV: " + argv.config);
 
-(async () => {await require("../src/RunSetup").runSetup(Init);})();
+console.log("ANTES do setup setup/init.js");
+
+(async () =>
+{
+    await require("../src/RunSetup").runSetup(Init);
+})();
+
+console.log("DEPOIS do setup setup/init.js");

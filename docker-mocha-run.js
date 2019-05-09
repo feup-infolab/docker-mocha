@@ -28,6 +28,9 @@ let threadsNumber = DEFAULT_THREAD;
 let defaultExists = false;
 let overrideExists = false;
 
+let setuping = false;
+let testing = false;
+
 const dockerMocha = new DockerMocha();
 let running = 0;
 
@@ -122,200 +125,223 @@ for(let i in process.argv)
     {
         dockerMocha.noDelete = true;
     }
-}
 
-try
-{
-    //verify if the other *.json tests file exists
-    if(overrideFile != null && fs.existsSync(overrideFile))
-        overrideExists = true;
-}
-catch(err) {
-    overrideExists = false;}
-
-try
-{
-    //verify if the default *.json tests file exists
-    if(defaultFile != null && fs.existsSync(defaultFile))
-        defaultExists = true;
-}
-catch(err)
-{
-    defaultExists = false;}
-
-try
-{
-    //verify if compose file exists
-    if(composeFile != null)
-        fs.existsSync(composeFile)
-}
-catch (err)
-{
-    console.warn("WARN: Specified Compose file not found, using default");
-    composeFile = null;
-}
-
-if(!defaultExists && !overrideExists)
-{
-    console.error("ERROR: No Default file or Override file found");
-    process.exit(1);
-}
-else
-{
-    let fileToUse = null;
-
-    if(!overrideExists)
+    if(process.argv[i] === "--testing")
     {
-        fileToUse = defaultFile;
-        console.warn("WARN: Override file not found using default File");
+        testing = true;
+    }
+
+    if(process.argv[i] === "--setuping")
+    {
+        setuping = true;
+    }
+}
+
+if(!setuping && !testing)
+{
+
+    try
+    {
+        //verify if the other *.json tests file exists
+        if(overrideFile != null && fs.existsSync(overrideFile))
+            overrideExists = true;
+    }
+    catch(err) {
+        overrideExists = false;}
+
+    try
+    {
+        //verify if the default *.json tests file exists
+        if(defaultFile != null && fs.existsSync(defaultFile))
+            defaultExists = true;
+    }
+    catch(err)
+    {
+        defaultExists = false;}
+
+    try
+    {
+        //verify if compose file exists
+        if(composeFile != null)
+            fs.existsSync(composeFile)
+    }
+    catch (err)
+    {
+        console.warn("WARN: Specified Compose file not found, using default");
+        composeFile = null;
+    }
+
+    if(!defaultExists && !overrideExists)
+    {
+        console.error("ERROR: No Default file or Override file found");
+        process.exit(1);
     }
     else
     {
-        fileToUse = overrideFile;
-        console.info("INFO: Using override file: " + overrideFile);
-    }
+        let fileToUse = null;
 
-    //Loading compose File
-    if(Utils.isNull(composeFile))
-    {
-        try
+        if(!overrideExists)
         {
-            let composeContents = yaml.safeLoad(fs.readFileSync("docker-compose.yml"));
-            composeFile = path.join(process.cwd(), "docker-compose.yml");
-            dockerMocha.addComposeFile(composeFile, composeContents);
-            console.info("INFO: Using default docker-compose.yml");
+            fileToUse = defaultFile;
+            console.warn("WARN: Override file not found using default File");
         }
-        catch (e)
+        else
         {
-            console.error("ERROR: No default docker-compose.yml");
-            process.exit(1);
+            fileToUse = overrideFile;
+            console.info("INFO: Using override file: " + overrideFile);
         }
-    }
-    else
-    {
-        try
-        {
-            let composeContents = yaml.safeLoad(fs.readFileSync(composeFile));
-            dockerMocha.addComposeFile(composeFile, composeContents);
-            console.info("INFO: Using specified compose file: " + composeFile);
-        }
-        catch (e)
-        {
-            console.error("ERROR: Could not load file: " + composeFile);
-            process.exit(1);
-        }
-    }
 
-    if(Utils.isNull(entrypoint))
-    {
-        try
+        //Loading compose File
+        if(Utils.isNull(composeFile))
         {
-            const packageJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package.json"), 'utf8'));
-            entrypoint = packageJson.name;
+            try
+            {
+                let composeContents = yaml.safeLoad(fs.readFileSync("docker-compose.yml"));
+                composeFile = path.join(process.cwd(), "docker-compose.yml");
+                dockerMocha.addComposeFile(composeFile, composeContents);
+                console.info("INFO: Using default docker-compose.yml");
+            }
+            catch (e)
+            {
+                console.error("ERROR: No default docker-compose.yml");
+                process.exit(1);
+            }
+        }
+        else
+        {
+            try
+            {
+                let composeContents = yaml.safeLoad(fs.readFileSync(composeFile));
+                dockerMocha.addComposeFile(composeFile, composeContents);
+                console.info("INFO: Using specified compose file: " + composeFile);
+            }
+            catch (e)
+            {
+                console.error("ERROR: Could not load file: " + composeFile);
+                process.exit(1);
+            }
+        }
+
+        if(Utils.isNull(entrypoint))
+        {
+            try
+            {
+                const packageJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package.json"), 'utf8'));
+                entrypoint = packageJson.name;
+                dockerMocha.entrypoint = entrypoint;
+            }
+            catch (e) {
+                console.error("ERROR: Unable to retrieve entrypoint service, please provide a package json or specify with -e flag");
+                process.exit(1);
+            }
+        }
+        else
             dockerMocha.entrypoint = entrypoint;
-        }
-        catch (e) {
-            console.error("ERROR: Unable to retrieve entrypoint service, please provide a package json or specify with -e flag");
+
+        //Informing threads number
+        console.info("INFO: Using " + threadsNumber + " thread(s)");
+
+        //Parsing tests from *.json tests file
+        const testsFile = JSON.parse(fs.readFileSync(fileToUse, 'utf8'));
+
+
+        const tests = testsFile["tests"];
+        const states = testsFile["states"];
+
+        if(Utils.isNull(tests))
+        {
+            console.error("ERROR: no section 'tests' specified in the test file");
             process.exit(1);
         }
-    }
-    else
-        dockerMocha.entrypoint = entrypoint;
-
-    //Informing threads number
-    console.info("INFO: Using " + threadsNumber + " thread(s)");
-
-    //Parsing tests from *.json tests file
-    const testsFile = JSON.parse(fs.readFileSync(fileToUse, 'utf8'));
-
-
-    const tests = testsFile["tests"];
-    const states = testsFile["states"];
-
-    if(Utils.isNull(tests))
-    {
-        console.error("ERROR: no section 'tests' specified in the test file");
-        process.exit(1);
-    }
-    else if(Utils.isNull(states))
-    {
-        console.error("ERROR: no section 'states' specified in the test file");
-        process.exit(1);
-    }
-
-    //Parsing states
-    dockerMocha.statesMap = states;
-    let rootTests = 0;
-    for(let state in states)
-    {
-       if (states.hasOwnProperty(state))
-       {
-            if(Utils.isNull(states[state]["depends_on"]))
-            {
-                dockerMocha.rootState = state;
-                rootTests++;
-            }
-            dockerMocha.addState(state);
-       }
-    }
-    if(rootTests !== 1)
-    {
-        console.error("ERROR: Multiple root states detected, only one is allowed: " + rootTests);
-        process.exit(1);
-    }
-    dockerMocha.verifyAndWarnStates();
-
-
-    //Parsing tests
-    //For each test verify if the test file and setup file exist. Add to docker mocha if positive
-    let totalTests = 0;
-    let badTests = 0;
-    for(let test in tests)
-    {
-        if(tests.hasOwnProperty(test))
+        else if(Utils.isNull(states))
         {
-            if(!Utils.isNull(tests[test]["state"]) && dockerMocha.statesMap.hasOwnProperty(tests[test]["state"]))
+            console.error("ERROR: no section 'states' specified in the test file");
+            process.exit(1);
+        }
+
+        //Parsing states
+        dockerMocha.statesMap = states;
+        let rootTests = 0;
+        for(let state in states)
+        {
+            if (states.hasOwnProperty(state))
             {
-                dockerMocha.addTest(test, tests[test]);
-            }
-            else
-            {
-                console.warn("WARN: Ignored: " + JSON.stringify(tests[test]));
-                badTests++;
+                if(Utils.isNull(states[state]["depends_on"]))
+                {
+                    dockerMocha.rootState = state;
+                    rootTests++;
+                }
+                dockerMocha.addState(state);
             }
         }
-        totalTests++;
-    }
-    if(badTests > 0)
-    {
-        console.warn("WARN: Some tests have been ignored: " + badTests);
-        console.log("INFO: Added " + (totalTests-badTests) + " tests");
-    }
-    else
-    {
-        console.log("INFO: All tests added: " + (totalTests));
-    }
-
-    //Initialize DockerManager
-    DockerManager();
-
-    startTime = new Date();
-
-    if(dockerMocha.noDelete)
-    {
-        manager();
-    }
-    else
-    {
-        DockerManager.removeAllVolumes(() =>
+        if(rootTests !== 1)
         {
-            DockerManager.deleteAllStates(dockerMocha, () =>
+            console.error("ERROR: Multiple root states detected, only one is allowed: " + rootTests);
+            process.exit(1);
+        }
+        dockerMocha.verifyAndWarnStates();
+
+
+        //Parsing tests
+        //For each test verify if the test file and setup file exist. Add to docker mocha if positive
+        let totalTests = 0;
+        let badTests = 0;
+        for(let test in tests)
+        {
+            if(tests.hasOwnProperty(test))
             {
-                manager();
+                if(!Utils.isNull(tests[test]["state"]) && dockerMocha.statesMap.hasOwnProperty(tests[test]["state"]))
+                {
+                    dockerMocha.addTest(test, tests[test]);
+                }
+                else
+                {
+                    console.warn("WARN: Ignored: " + JSON.stringify(tests[test]));
+                    badTests++;
+                }
+            }
+            totalTests++;
+        }
+        if(badTests > 0)
+        {
+            console.warn("WARN: Some tests have been ignored: " + badTests);
+            console.log("INFO: Added " + (totalTests-badTests) + " tests");
+        }
+        else
+        {
+            console.log("INFO: All tests added: " + (totalTests));
+        }
+
+        //Initialize DockerManager
+        DockerManager();
+
+        startTime = new Date();
+
+        if(dockerMocha.noDelete)
+        {
+            manager();
+        }
+        else
+        {
+            DockerManager.removeAllVolumes(() =>
+            {
+                DockerManager.deleteAllStates(dockerMocha, () =>
+                {
+                    manager();
+                });
             });
-        });
+        }
     }
 }
+else if(setuping)
+{
+    console.log("SETUPING...");
+}
+else if(testing)
+{
+    console.log("TESTING...");
+}
+
 
 function manager()
 {

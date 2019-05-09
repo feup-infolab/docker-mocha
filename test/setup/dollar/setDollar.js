@@ -8,7 +8,7 @@ class SetPound
         const dollar = 1.13;
         request('http://localhost:' + port + '/add/dollar?value=' + dollar, {json:true}, (err, res, body) =>
         {
-            console.log(body);
+            console.log("Body aqui: ", body);
             callback(null);
         })
     }
@@ -16,5 +16,8 @@ class SetPound
     static init(callback){callback(null)}
 }
 
+console.log("ANTES do setup setup/dollar/setDollar.js");
 
 (async () => {await require("../../src/RunSetup").runSetup(SetPound);})();
+
+console.log("DEPOIS do setup setup/dollar/setDollar.js");

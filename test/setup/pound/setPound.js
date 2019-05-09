@@ -9,7 +9,7 @@ class SetPound
         const pound = 0.86;
         request('http://localhost:' + port + '/add/pound?value=' + pound, {json:true}, (err, res, body) =>
         {
-            console.log(body);
+            console.log("Body aqui: ", body);
             callback(null);
         })
     }
@@ -17,4 +17,9 @@ class SetPound
     static init(callback){callback(null)}
 }
 
+
+console.log("ANTES do setup setup/pound/setPound.js");
+
 (async () => {await require("../../src/RunSetup").runSetup(SetPound);})();
+
+console.log("DEPOIS do setup setup/pound/setPound.js");
