@@ -12,12 +12,14 @@
   "author": "nuno.neto",
   "license": "ISC",
   "dependencies": {
-    "@feup-infolab/docker-mocha": "0.0.3",
     "async": "^2.6.2",
     "better-queue": "^3.8.10",
     "express": "^4.16.4",
     "js-yaml": "^3.12.2",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "export-to-csv": "^0.2.1",
+    "underscore": "^1.9.1",
+    "yargs": "^13.2.2"
   },
   "devDependencies": {
     "mocha": "^5.1.1",

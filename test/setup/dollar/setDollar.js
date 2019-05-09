@@ -1,7 +1,7 @@
 const request = require('request');
 const port = 3000;
 
-class SetPound
+class SetDollar
 {
     static load(callback)
     {
@@ -14,10 +14,8 @@ class SetPound
     }
 
     static init(callback){callback(null)}
+
+    static shutdown(callback){callback(null)}
 }
 
-console.log("ANTES do setup setup/dollar/setDollar.js");
-
-(async () => {await require("../../src/RunSetup").runSetup(SetPound);})();
-
-console.log("DEPOIS do setup setup/dollar/setDollar.js");
+module.exports = SetDollar;

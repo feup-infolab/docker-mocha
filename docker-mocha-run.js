@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 
-const DockerMocha = require("./src/DockerMocha");
-const DockerManager = require("./src/DockerManager");
 const path = require("path");
 const async = require("async");
 const fs = require("fs");
 const yaml = require("js-yaml");
+
+const DockerMocha = require("./src/DockerMocha");
+const DockerManager = require("./src/DockerManager");
 const Utils = require("./src/utils");
 const Queue = require('better-queue');
 const ExportToCsv = require('export-to-csv').ExportToCsv;
+const Mocha = require('mocha');
 
 const defaultFileName = "tests.json";
 const defaultFile = path.join(process.cwd(), defaultFileName);
@@ -139,7 +141,6 @@ for(let i in process.argv)
 
 if(!setuping && !testing)
 {
-
     try
     {
         //verify if the other *.json tests file exists
@@ -335,11 +336,45 @@ if(!setuping && !testing)
 }
 else if(setuping)
 {
-    console.log("SETUPING...");
+    const trimmedOverrideFile = Utils.trimJSExtension(overrideFile);
+    const loaderClass = require(`${trimmedOverrideFile}`);
+
+    console.log(`Setting up state ${loaderClass.name} from file ${trimmedOverrideFile}`);
+
+    async.series([
+      loaderClass.init,
+      loaderClass.load,
+      loaderClass.shutdown
+    ], function(err, results){
+
+    });
 }
 else if(testing)
 {
-    console.log("TESTING...");
+    const trimmedOverrideFile = Utils.trimJSExtension(overrideFile);
+    const loaderClass = require(`${trimmedOverrideFile}`);
+
+    console.log(`Running Tests on ${trimmedOverrideFile} after running init present in ${trimmedOverrideFile}`);
+
+    async.series([
+      loaderClass.init,
+      function(callback)
+      {
+        // Instantiate a Mocha instance.
+        var mocha = new Mocha();
+
+        mocha.addFile(
+          path.join(process.cwd(), overrideFile)
+        );
+
+        // Run the tests.
+        mocha.run(function(failures) {
+          process.exitCode = failures ? 1 : 0;  // exit with non-zero status if there were failures
+        });
+      }
+    ], function(err, results){
+
+    });
 }
 
 

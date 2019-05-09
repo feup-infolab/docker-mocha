@@ -14,14 +14,8 @@ class Init
     }
 
     static init(callback){callback(null)}
+
+    static shutdown(callback){callback(null)}
 }
 
-
-console.log("ANTES do setup setup/init.js");
-
-(async () =>
-{
-    await require("../src/RunSetup").runSetup(Init);
-})();
-
-console.log("DEPOIS do setup setup/init.js");
+module.exports = Init;

@@ -1,7 +1,6 @@
 const request = require('request');
 const port = 3000;
 
-
 class SetPound
 {
     static load(callback)
@@ -15,11 +14,9 @@ class SetPound
     }
 
     static init(callback){callback(null)}
+
+    static shutdown(callback){callback(null)}
 }
 
+module.exports = SetPound;
 
-console.log("ANTES do setup setup/pound/setPound.js");
-
-(async () => {await require("../../src/RunSetup").runSetup(SetPound);})();
-
-console.log("DEPOIS do setup setup/pound/setPound.js");

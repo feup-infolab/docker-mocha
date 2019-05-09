@@ -6,6 +6,8 @@ const os = require("os");
 const request = require("request");
 const _ = require("underscore");
 
+const dockerMochaCommand = "node ./docker-mocha-run.js";
+
 const DockerManager = function () {};
 
 function validIP(ipaddress) {
@@ -467,17 +469,10 @@ DockerManager.runSetup = function(container, state, dockerMocha, callback)
         configOption = `--config='${dockerMocha.deployment_config}'`
     }
 
-    console.log("Running setup in: " + container, `'docker exec ${container} node ${setupPath} ${configOption}'`);
+    const command = `docker exec ${container} ${dockerMochaCommand} --setuping -f ${setupPath} ${configOption}`;
+    console.log("Running setup in: " + container + " . " + command);
 
-    /*
-    DockerManager.runCommand(container, `node ${setupPath} ${configOption}`, (err, result) =>
-    {
-        console.log("RUNSETUP", err, result);
-        callback(err, result);
-    });
-    */
-
-    const newProcess = childProcess.exec(`docker exec -e DOCKER_MOCHA_ENV=true ${container}  node ${setupPath} ${configOption}`,
+    const newProcess = childProcess.exec(command,
         (err, result) =>
         {
             //console.log("RUNSETUP", err, result);
@@ -515,21 +510,12 @@ DockerManager.runTest = function(container, test, testPath, dockerMocha, callbac
         configOption = `--config='${dockerMocha.deployment_config}'`
     }
 
-    console.log("Running test: " + test, `'docker exec ${container} ./node_modules/mocha/bin/mocha  ${testPath} ${configOption}'`);
+    const command = `docker exec ${container} ${dockerMochaCommand} --testing -f ${testPath} ${configOption}`;
+    console.log("Running test: " + test + " . " + command);
 
-
-    /*
-    DockerManager.runCommand(container, `./node_modules/mocha/bin/mocha  ${testPath} ${configOption}`, (err, result) =>
-    {
-        console.log("RUNTESET", err, result);
-        callback(err, result);
-    });
-    */
-
-    const newProcess = childProcess.exec(`docker exec -e DOCKER_MOCHA_ENV=true ${container} ./node_modules/mocha/bin/mocha  ${testPath} ${configOption}`,
+    const newProcess = childProcess.exec(command,
         (err, result) =>
         {
-            //console.log("RUNTESET", err, result);
             callback(err, result);
         });
 

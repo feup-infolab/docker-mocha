@@ -6,19 +6,11 @@ services:
     image: nuno/node-currency:latest${STATE}
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile
+      dockerfile: Dockerfile
     networks:
       custom_net:
         aliases:
           - dendro
-  mongo:
-    container_name: ${ENVIRONMENT}.mongo
-    image: mongo:3${STATE}
-    networks:
-      custom_net:
-        aliases:
-          - mongo
-
 networks:
   custom_net:
     name: ${ENVIRONMENT}
