@@ -72,10 +72,11 @@ DockerManager.deleteAllStates = function(dockerMocha, callback)
 {
     DockerManager.getAllServicesInOrchestra(dockerMocha,(services) =>
     {
+        console.log("Deleting all states");
         async.mapSeries(services,
             (service, callback) =>
             {
-                console.log("Deleting all states", `'docker images | grep ${service.image} | tr -s ' ' | cut -d ' ' -f 2 | grep -v ${service.tag}$ | xargs -I {} docker rmi ${service.image}:{} -f'`);
+                //console.log(`'docker images | grep ${service.image} | tr -s ' ' | cut -d ' ' -f 2 | grep -v ${service.tag}$ | xargs -I {} docker rmi ${service.image}:{} -f'`);
 
                 const newProcess = childProcess.exec(`docker images | grep ${service.image}| tr -s ' ' | cut -d ' ' -f 2 | grep -v ${service.tag}$ | xargs -I {} docker rmi ${service.image}:{} -f`,
                     (err, result) =>
@@ -333,9 +334,12 @@ DockerManager.startEnvironment = function(environment, state, dockerMocha, callb
 DockerManager.saveEnvironment = function(environment, dockerMocha, callback)
 {
     DockerManager.getAllServicesInOrchestra(dockerMocha, (services) => {
+
+        console.log("Saving state: " + environment);
+
         async.mapSeries(services,
             (service, callback) => {
-                console.log("Saving state: " + environment, `'docker commit ${environment}.${service.name} ${service.image}:${service.tag}${environment}'`);
+                // console.log("Saving state: " + environment, `'docker commit ${environment}.${service.name} ${service.image}:${service.tag}${environment}'`);
 
                 const newProcess = childProcess.exec(`docker commit ${environment}.${service.name} ${service.image}:${service.tag}${environment}`,
                     (err, result) =>
@@ -359,7 +363,7 @@ DockerManager.stopEnvironment = function(environment, state, dockerMocha, callba
         state = vanillaString;
     }
 
-    console.log("Stopping state: " + state, `'export STATE='${state}' && export ENVIRONMENT='${environment}' && docker-compose -f '${dockerMocha.composeFile}' -p ${environment} down'`);
+    console.log(`Stopping state. Created ${environment} from base ${state}. 'export STATE='${state}' && export ENVIRONMENT='${environment}' && docker-compose -f '${dockerMocha.composeFile}' -p ${environment} down'`);
 
     const newProcess = childProcess.exec(`export STATE='${state}' && export ENVIRONMENT='${environment}' && docker-compose -f '${dockerMocha.composeFile}' -p ${environment}  down`,
         (err, result) =>
@@ -403,10 +407,11 @@ DockerManager.checkIfStateExists = function(state, dockerMocha, callback)
             callback(null);
         else
         {
+            console.log("Checking if state exists: " + state);
             async.mapSeries(services,
                 (service, callback) =>
                 {
-                    console.log("Checking if state exists: " + state, `'docker image inspect "${service.image}:${service.tag}${state}"'`);
+                    // console.log(`'docker image inspect "${service.image}:${service.tag}${state}"'`);
 
                     const newProcess = childProcess.exec(`docker image inspect "${service.image}:${service.tag}${state}"`,
                         (err, result) =>
@@ -642,14 +647,15 @@ DockerManager.checkConnection = function(container, address, port, callback)
     });
     */
 
-    DockerManager.runCommand(container, `wget --tries=1 localhost:${port}`,
+    DockerManager.runCommand(container, `wget --tries=1 localhost:${port} > /dev/null 2>&1`,
         (err, result) =>
         {
             if(err === 0)
                 callback(null);
             else
                 callback(err);
-        });
+        },
+        true);
 };
 
 /**
@@ -659,7 +665,7 @@ DockerManager.checkConnection = function(container, address, port, callback)
  * @param cmd
  * @param callback
  */
-DockerManager.runCommand = function(container, cmd, callback)
+DockerManager.runCommand = function(container, cmd, callback, muteLog)
 {
     const newProcess = childProcess.exec(`docker exec ${container} ${cmd}`,
         (err, result) =>
@@ -670,7 +676,8 @@ DockerManager.runCommand = function(container, cmd, callback)
                 callback(err.code, result);
         });
 
-    logEverythingFromChildProcess(newProcess);
+        if(!muteLog)
+          logEverythingFromChildProcess(newProcess);
 };
 
 
