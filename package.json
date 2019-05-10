@@ -39,7 +39,6 @@
     "setuping": "node ./docker-mocha-run.js --setuping",
     "coverage": "nyc --temp-directory=coverage --reporter=lcov npm test",
     "report-coverage": "node ./node_modules/.bin/codacy-coverage < ./coverage/lcov.info",
-    "postinstall": "npm install -g @feup-infolab/docker-mocha"
   },
   "bin": {
     "docker-mocha": "./docker-mocha-run.js",
