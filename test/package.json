@@ -7,7 +7,8 @@
     "test-docker": "docker-compose -f docker-compose.test.yml up && docker-compose -f docker-compose.test.yml down",
     "docker-mocha": "docker-mocha -f ./test/tests.json -t 2 -c docker-compose.yml -e dendro -p 3000",
     "graph": "docker-mocha-graph ./test/tests.json",
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "npm install -g git+https://github.com/feup-infolab/docker-mocha.git"
   },
   "author": "nuno.neto",
   "license": "ISC",

@@ -26,11 +26,11 @@
     "js-yaml": "^3.12.2",
     "request": "^2.88.0",
     "underscore": "^1.9.1",
-    "yargs": "^13.2.2"
+    "yargs": "^13.2.2",
+    "mocha": "^6.1.4"
   },
   "devDependencies": {
     "codacy-coverage": "^3.4.0",
-    "mocha": "^6.1.4",
     "nyc": "^13.3.0"
   },
   "scripts": {
