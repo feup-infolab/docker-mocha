@@ -1,7 +1,9 @@
 const request = require('request');
 const port = 3000;
 
-class SetPound
+const Init = require("../init");
+
+class SetPound extends Init
 {
     static load(callback)
     {
@@ -15,7 +17,10 @@ class SetPound
         })
     }
 
-    static init(callback){callback(null)}
+    static init(callback)
+    {
+        super.init(callback);
+    }
 
     static shutdown(callback){callback(null)}
 }

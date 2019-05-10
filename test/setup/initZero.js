@@ -6,7 +6,7 @@ class InitZero
 
     static init(callback)
     {
-        server.f();
+        server();
         callback(null);
     }
 

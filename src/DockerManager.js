@@ -374,7 +374,7 @@ DockerManager.saveEnvironment = function(environment, dockerMocha, callback)
 
         async.mapSeries(services,
             (service, callback) => {
-                // console.log("Saving state: " + environment, `'docker commit ${environment}.${service.name} ${service.image}:${service.tag}${environment}'`);
+                console.log("Saving state: " + environment, `docker commit ${environment}.${service.name} ${service.image}:${service.tag}${environment}`);
 
                 const newProcess = childProcess.exec(`docker commit ${environment}.${service.name} ${service.image}:${service.tag}${environment}`,
                     (err, result) =>
@@ -385,7 +385,7 @@ DockerManager.saveEnvironment = function(environment, dockerMocha, callback)
                         callback();
                     });
 
-                // logEverythingFromChildProcess(newProcess);
+                logEverythingFromChildProcess(newProcess);
             },
             (err, results) => {
                 callback();

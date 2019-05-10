@@ -17,8 +17,7 @@ class Init extends InitZero
 
     static init(callback)
     {
-        super.init();
-        callback(null)
+        super.init(callback);
     }
 
     static shutdown(callback){callback(null)}

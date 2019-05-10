@@ -9,4 +9,4 @@ RUN npm install --unsafe-perm
 COPY . .
 
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["sh", "-c", "tail -f /dev/null"]
