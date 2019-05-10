@@ -1,3 +1,9 @@
 const expressServer = require("./src/index");
 
-expressServer.start();
+
+function f()
+{
+    expressServer.start();
+}
+
+module.exports = f;

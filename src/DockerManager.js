@@ -203,10 +203,13 @@ DockerManager.restoreState = function(state, project, dockerMocha, callback)
 
                 DockerManager.startEnvironment(project, state, dockerMocha, (info) =>
                 {
+                    /*
                     DockerManager.waitForConnection(info.entrypoint, dockerMocha.port, () =>
                     {
                         callback(info);
                     })
+                    */
+                    callback(info);
                 })
             }
         })
@@ -239,6 +242,7 @@ DockerManager.createState = function(state, dockerMocha, callback)
                 {
                     DockerManager.startEnvironment(state, state, dockerMocha, (info) =>
                     {
+                        /*
                         DockerManager.waitForConnection(info.entrypoint, dockerMocha.port, () =>
                         {
                             DockerManager.runSetup(info.entrypoint, state, dockerMocha,(err, result) =>
@@ -249,6 +253,15 @@ DockerManager.createState = function(state, dockerMocha, callback)
                                 })
                             })
                         })
+                        */
+
+                        DockerManager.runSetup(info.entrypoint, state, dockerMocha,(err, result) =>
+                        {
+                            DockerManager.saveEnvironment(state, dockerMocha, () =>
+                            {
+                                callback(info);
+                            })
+                        })
                     })
                 })
             })
@@ -257,6 +270,7 @@ DockerManager.createState = function(state, dockerMocha, callback)
         {
             DockerManager.startEnvironment(state, stateParent, dockerMocha, (info) =>
             {
+                /*
                 DockerManager.waitForConnection(info.entrypoint, dockerMocha.port, () =>
                 {
                     DockerManager.runSetup(info.entrypoint, state, dockerMocha,(err, result) =>
@@ -265,6 +279,15 @@ DockerManager.createState = function(state, dockerMocha, callback)
                         {
                             callback(info);
                         })
+                    })
+                })
+                */
+
+                DockerManager.runSetup(info.entrypoint, state, dockerMocha,(err, result) =>
+                {
+                    DockerManager.saveEnvironment(state, dockerMocha, () =>
+                    {
+                        callback(info);
                     })
                 })
             })
@@ -277,6 +300,7 @@ DockerManager.startVanillaWithSetups = function(state, project, dockerMocha, cal
 {
     DockerManager.startEnvironment(project, null, dockerMocha, (info) =>
     {
+        /*
         DockerManager.waitForConnection(info.entrypoint, dockerMocha.port, () =>
         {
             DockerManager.runSetups(info.entrypoint, state, dockerMocha, (err, result) =>
@@ -284,6 +308,12 @@ DockerManager.startVanillaWithSetups = function(state, project, dockerMocha, cal
                 callback(info);
             })
         });
+        */
+
+        DockerManager.runSetups(info.entrypoint, state, dockerMocha, (err, result) =>
+        {
+            callback(info);
+        })
     })
 };
 

@@ -2,7 +2,9 @@ const request = require('request');
 const argv = require('yargs').argv;
 const port = 3000;
 
-class Init
+const InitZero = require("setup/initZero");
+
+class Init extends InitZero
 {
     static load(callback)
     {
@@ -13,7 +15,11 @@ class Init
         })
     }
 
-    static init(callback){callback(null)}
+    static init(callback)
+    {
+        super.init();
+        callback(null)
+    }
 
     static shutdown(callback){callback(null)}
 }
