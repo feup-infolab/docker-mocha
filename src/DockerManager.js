@@ -6,7 +6,9 @@ const os = require("os");
 const request = require("request");
 const _ = require("underscore");
 
-const dockerMochaCommand = "node ./docker-mocha-run.js";
+// for tests
+// const dockerMochaCommand = "node ./docker-mocha-run.js";
+const dockerMochaCommand = "docker-mocha";
 
 const DockerManager = function () {};
 
