@@ -140,7 +140,7 @@ for(let i in process.argv)
 
 if(!setupFile && !testFile) // manager
 {
-    console.log("NEM NADA Setup and test file");
+    // console.log("NEM NADA Setup and test file");
     try
     {
         //verify if the other *.json tests file exists
@@ -336,7 +336,7 @@ if(!setupFile && !testFile) // manager
 }
 else if(testFile && setupFile) // run a test. Needs the init function of the setup file and the testFile to run the test itself
 {
-    console.log("Setup and test file");
+    // console.log("Setup and test file");
 
     const loaderClass = Utils.requireFile(setupFile);
     const testFilePath = Utils.getAbsPath(testFile);
@@ -371,7 +371,7 @@ else if(testFile && setupFile) // run a test. Needs the init function of the set
 }
 else if(setupFile) // run a setup. Needs the init, load and shutdown methods of the setupFile
 {
-    console.log("Setup file only");
+    // console.log("Setup file only");
     const loaderClass = Utils.requireFile(setupFile);
     console.log(`Setting up state ${loaderClass.name} from file ${setupFile}`);
 
