@@ -510,6 +510,11 @@ DockerManager.runTest = function(container, test, testPath, dockerMocha, callbac
         configOption = `--config='${dockerMocha.deployment_config}'`
     }
 
+    const stateNeeded = dockerMocha.getTestState(test);
+    const setupPath = dockerMocha.getStateSetup(stateNeeded);
+
+    console.log(`State needed for test ${test} in ${testPath}: ${stateNeeded}. Loading from ${setupPath}`);
+
     const command = `docker exec ${container} ${dockerMochaCommand} --testFile ${testPath} --setupFile ${setupPath} ${configOption}`;
     console.log("Running test: " + test + " . " + command);
 

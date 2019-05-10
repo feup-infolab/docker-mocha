@@ -337,120 +337,66 @@ if(!setupFile && !testFile) // manager
 else if(testFile && setupFile) // run a test. Needs the init function of the setup file and the testFile to run the test itself
 {
     console.log("Setup and test file");
-    const trimmedOverrideFile = Utils.trimJSExtension(setupFile);
-    const loaderClass = require(`${trimmedOverrideFile}`);
 
-    console.log(`Running Tests on ${trimmedOverrideFile} after running init present in ${trimmedOverrideFile}`);
+    const loaderClass = Utils.requireFile(setupFile);
+    const testFilePath = Utils.getAbsPath(testFile);
 
-    async.series([
+    console.log(`Running Tests on ${testFile} after running init present in ${setupFile}`);
+
+    const taskList = [
         loaderClass.init,
         function(callback)
         {
+            console.log("Ran INIT of " + loaderClass.name + " before test " + testFile);
+            callback(null);
+        },
+        function(callback)
+        {
             // Instantiate a Mocha instance.
-            var mocha = new Mocha();
+            const mocha = new Mocha();
 
             mocha.addFile(
-                path.join(process.cwd(), overrideFile)
+                testFilePath
             );
 
             // Run the tests.
             mocha.run(function(failures) {
                 process.exitCode = failures ? 1 : 0;  // exit with non-zero status if there were failures
+                callback(!!failures);
             });
         }
-    ], function(err, results){
+    ];
 
-    });
+    Utils.runSync(taskList);
 }
 else if(setupFile) // run a setup. Needs the init, load and shutdown methods of the setupFile
 {
     console.log("Setup file only");
-    console.log(process.cwd());
     const loaderClass = Utils.requireFile(setupFile);
     console.log(`Setting up state ${loaderClass.name} from file ${setupFile}`);
 
+    const taskList = [
+        loaderClass.init,
+        function(callback)
+        {
+            console.log("Ran INIT of " + loaderClass.name);
+            callback(null);
+        },
+        loaderClass.load,
+        function(callback)
+        {
+            console.log("Ran LOAD of " + loaderClass.name);
+            callback(null);
+        },
+        loaderClass.shutdown,
+        function(callback)
+        {
+            console.log("Ran SHUTDOWN of " + loaderClass.name);
+            callback(null);
+        }
+    ];
 
-    let result;
-    let error;
-    let timeoutArmed = false;
-    let taskTimeout;
-    let sleepTimeout;
-
-    const timeout = function(callback)
-    {
-        taskTimeout = setTimeout(
-            function()
-            {
-                console.log("Arrived at timeout at  " + loaderClass.name);
-                if(!result)
-                {
-                    console.log("Task timed out during setup operation of " + loaderClass.name);
-                    result = "timeout";
-                    callback();
-                }
-            },
-            6 * 1000
-        );
-    };
-
-    const performTasks = function(callback)
-    {
-        async.series([
-            loaderClass.init,
-            function(callback)
-            {
-                console.log("Ran INIT of " + loaderClass.name);
-                callback(null);
-            },
-            loaderClass.load,
-            function(callback)
-            {
-                console.log("Ran LOAD of " + loaderClass.name);
-                callback(null);
-            },
-            loaderClass.shutdown,
-            function(callback)
-            {
-                console.log("Ran SHUTDOWN of " + loaderClass.name);
-                callback(null);
-            }
-        ], function(err, results){
-            if(err)
-            {
-                result = "error";
-                error = err;
-            }
-            else
-            {
-                result = "ok";
-            }
-
-            console.log("Ran EVERYTHING of " + loaderClass.name + " with result " + result);
-
-            callback(err, results);
-            clearTimeout(taskTimeout);
-        });
-    };
-
-    async.race([
-        timeout,
-        performTasks
-    ]);
-
-    function sleep()
-    {
-        sleepTimeout = setTimeout(function() {
-            if(!result)
-            {
-                console.log('Operation sleeping...');
-                clearTimeout(sleepTimeout);
-                sleepTimeout = null;
-                sleep();
-            }
-        }, 100);
-    }
-
-    sleep();
+    Utils.runSync(taskList);
 }
 
 
@@ -525,7 +471,7 @@ function manager()
         {
             runTest(task["name"], (err) =>
             {
-                if(err > 0)
+                if(err)
                 {
                     failedTests++;
                     callback(1);
@@ -640,7 +586,7 @@ function runTest(test, callback)
             {
                 DockerManager.runTest(info.entrypoint, test, testPath, dockerMocha, (err, result) =>
                 {
-                    if (err > 0)
+                    if (err)
                         console.error("Test Failed: " + test);
                     else
                         console.info("Test Passed: " + test);
