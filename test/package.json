@@ -24,7 +24,8 @@
   "devDependencies": {
     "mocha": "^5.1.1",
     "nyc": "^13.3.0",
-    "yargs": "^13.2.2"
+    "yargs": "^13.2.2",
+    "@feup-infolab/docker-mocha": "git+https://github.com/feup-infolab/docker-mocha.git"
   },
   "description": ""
 }
