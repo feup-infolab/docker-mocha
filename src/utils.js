@@ -7,9 +7,9 @@ Utils.isNull = function (something)
     return something === null || something === undefined;
 };
 
-Utils.trimJSExtension = function(fullPath)
+Utils.requireFile = function(relativePath)
 {
-    return path.join(path.dirname(fullPath), path.parse(fullPath).name);
+    return require(path.join(process.cwd(),path.join(path.dirname(relativePath), path.parse(relativePath).name)));
 };
 
 module.exports = Utils;

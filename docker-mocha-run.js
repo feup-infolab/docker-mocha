@@ -30,11 +30,10 @@ let threadsNumber = DEFAULT_THREAD;
 let defaultExists = false;
 let overrideExists = false;
 
-let setuping = false;
-let testing = false;
+let testFile = false;
+let setupFile = false;
 
 const dockerMocha = new DockerMocha();
-let running = 0;
 
 let passedTests = 0;
 let failedTests = 0;
@@ -128,19 +127,20 @@ for(let i in process.argv)
         dockerMocha.noDelete = true;
     }
 
-    if(process.argv[i] === "--testing")
+    if(process.argv[i] === "--testFile")
     {
-        testing = true;
+        testFile = process.argv[Number(i) + 1];
     }
 
-    if(process.argv[i] === "--setuping")
+    if(process.argv[i] === "--setupFile")
     {
-        setuping = true;
+        setupFile = process.argv[Number(i) + 1];
     }
 }
 
-if(!setuping && !testing)
+if(!setupFile && !testFile) // manager
 {
+    console.log("NEM NADA Setup and test file");
     try
     {
         //verify if the other *.json tests file exists
@@ -334,12 +334,40 @@ if(!setuping && !testing)
         }
     }
 }
-else if(setuping)
+else if(testFile && setupFile) // run a test. Needs the init function of the setup file and the testFile to run the test itself
 {
-    const trimmedOverrideFile = Utils.trimJSExtension(overrideFile);
+    console.log("Setup and test file");
+    const trimmedOverrideFile = Utils.trimJSExtension(setupFile);
     const loaderClass = require(`${trimmedOverrideFile}`);
 
-    console.log(`Setting up state ${loaderClass.name} from file ${trimmedOverrideFile}`);
+    console.log(`Running Tests on ${trimmedOverrideFile} after running init present in ${trimmedOverrideFile}`);
+
+    async.series([
+        loaderClass.init,
+        function(callback)
+        {
+            // Instantiate a Mocha instance.
+            var mocha = new Mocha();
+
+            mocha.addFile(
+                path.join(process.cwd(), overrideFile)
+            );
+
+            // Run the tests.
+            mocha.run(function(failures) {
+                process.exitCode = failures ? 1 : 0;  // exit with non-zero status if there were failures
+            });
+        }
+    ], function(err, results){
+
+    });
+}
+else if(setupFile) // run a setup. Needs the init, load and shutdown methods of the setupFile
+{
+    console.log("Setup file only");
+    console.log(process.cwd());
+    const loaderClass = Utils.requireFile(setupFile);
+    console.log(`Setting up state ${loaderClass.name} from file ${setupFile}`);
 
 
     let result;
@@ -423,33 +451,6 @@ else if(setuping)
     }
 
     sleep();
-}
-else if(testing)
-{
-    const trimmedOverrideFile = Utils.trimJSExtension(overrideFile);
-    const loaderClass = require(`${trimmedOverrideFile}`);
-
-    console.log(`Running Tests on ${trimmedOverrideFile} after running init present in ${trimmedOverrideFile}`);
-
-    async.series([
-      loaderClass.init,
-      function(callback)
-      {
-        // Instantiate a Mocha instance.
-        var mocha = new Mocha();
-
-        mocha.addFile(
-          path.join(process.cwd(), overrideFile)
-        );
-
-        // Run the tests.
-        mocha.run(function(failures) {
-          process.exitCode = failures ? 1 : 0;  // exit with non-zero status if there were failures
-        });
-      }
-    ], function(err, results){
-
-    });
 }
 
 

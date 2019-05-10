@@ -469,7 +469,7 @@ DockerManager.runSetup = function(container, state, dockerMocha, callback)
         configOption = `--config='${dockerMocha.deployment_config}'`
     }
 
-    const command = `docker exec ${container} ${dockerMochaCommand} --setuping -f ${setupPath} ${configOption}`;
+    const command = `docker exec ${container} ${dockerMochaCommand} --setupFile ${setupPath} ${configOption}`;
     console.log("Running setup in: " + container + " . " + command);
 
     const newProcess = childProcess.exec(command,
@@ -510,7 +510,7 @@ DockerManager.runTest = function(container, test, testPath, dockerMocha, callbac
         configOption = `--config='${dockerMocha.deployment_config}'`
     }
 
-    const command = `docker exec ${container} ${dockerMochaCommand} --testing -f ${testPath} ${configOption}`;
+    const command = `docker exec ${container} ${dockerMochaCommand} --testFile ${testPath} --setupFile ${setupPath} ${configOption}`;
     console.log("Running test: " + test + " . " + command);
 
     const newProcess = childProcess.exec(command,
