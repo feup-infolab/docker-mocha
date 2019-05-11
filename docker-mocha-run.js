@@ -453,18 +453,18 @@ function manager()
                 const childTests = dockerMocha.dependencyMap[task["name"]]["child_tests"];
                 const childStates = dockerMocha.dependencyMap[task["name"]]["child_states"];
 
-                //unlock all the child tests
-                for (const j in childTests)
-                {
-                    const test = childTests[j];
-                    queue.push({"type": "test", "name": test});
-                }
-
                 //unlock all the child states
                 for (const i in childStates)
                 {
                     const state = childStates[i];
                     queue.push({"type": "state", "name": state});
+                }
+
+                //unlock all the child tests
+                for (const j in childTests)
+                {
+                    const test = childTests[j];
+                    queue.push({"type": "test", "name": test});
                 }
 
                 callback(null);
