@@ -140,7 +140,7 @@ Utils.checkConnectivityOnPort = function(port, callback, textToExpectOnSuccess)
         interval: function (retryCount)
         {
             const msecs = 1000;
-            Logger.log("debug", "Waiting " + msecs / 1000 + " seconds to retry a connection to Virtuoso");
+            console.log("Waiting " + msecs / 1000 + " seconds to retry a connection to Virtuoso");
             return msecs;
         }
     }, tryToConnect, function (err)
