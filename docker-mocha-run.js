@@ -343,6 +343,9 @@ else if(testFile && setupFile) // run a test. Needs the init function of the set
 
     console.log(`Running Tests on ${testFile} after running init present in ${setupFile}`);
 
+
+    let testsFailed = 1;
+
     const taskList = [
         loaderClass.init,
         function(callback)
@@ -374,7 +377,14 @@ else if(testFile && setupFile) // run a test. Needs the init function of the set
             // Run the tests.
             mocha.run(function(failures) {
                 process.exitCode = failures ? 1 : 0;  // exit with non-zero status if there were failures
-                callback(!!failures);
+                testsFailed = process.exitCode;
+                callback();
+            });
+        },
+        function(callback)
+        {
+            loaderClass.shutdown(function(){
+                callback(testsFailed);
             });
         }
     ];
@@ -423,7 +433,6 @@ else if(setupFile) // run a setup. Needs the init, load and shutdown methods of 
 
     Utils.runSync(taskList);
 }
-
 
 function manager()
 {

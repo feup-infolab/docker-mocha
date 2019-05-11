@@ -7,7 +7,9 @@ const path = folder + '/' + file;
 const app = express();
 let myExports = exports;
 
-exports.start = (callback, port = 3000) =>
+const Server = {};
+
+Server.start = (callback, port = 3000) =>
 {
     app.get('/', (req, res) => res.send('Hello World!'));
 
@@ -99,18 +101,19 @@ exports.start = (callback, port = 3000) =>
         });
     });
 
-    let server = app.listen(port, () =>
+    Server.server = app.listen(port, () =>
     {
         console.log(`App listening on port ${port}!`);
-        myExports.server = server;
         if(callback != null)
             callback();
     });
 };
 
-exports.stop = () =>
+Server.stop = (callback) =>
 {
     console.log('Closing app!');
-    this.server.close();
+    Server.server.close(callback);
 };
 
+
+module.exports = Server;

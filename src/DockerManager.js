@@ -557,9 +557,9 @@ DockerManager.runTest = function(container, test, testPath, dockerMocha, callbac
 
     let command;
     if(dockerMocha.port)
-        command = `docker exec ${container} ${dockerMochaCommand} -p ${dockerMocha.port} --setupFile ${setupPath} ${configOption}`;
+        command = `docker exec ${container} ${dockerMochaCommand} -p ${dockerMocha.port} --setupFile ${setupPath} --testFile ${testPath} ${configOption}`;
     else
-        command = `docker exec ${container} ${dockerMochaCommand} --setupFile ${setupPath} ${configOption}`;
+        command = `docker exec ${container} ${dockerMochaCommand} --setupFile ${setupPath} --testFile ${testPath} ${configOption}`;
 
     console.log("Running test: " + test + " . " + command);
 

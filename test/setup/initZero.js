@@ -1,4 +1,4 @@
-const server = require("../server");
+const server = require("../src/index");
 
 class InitZero
 {
@@ -6,11 +6,11 @@ class InitZero
 
     static init(callback)
     {
-        server(callback);
+        server.start(callback);
     }
 
     static shutdown(callback){
-        server.server.close(callback);
+        server.stop(callback);
     }
 }
 
