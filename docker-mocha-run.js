@@ -376,7 +376,8 @@ else if(testFile && setupFile) // run a test. Needs the init function of the set
                 process.exitCode = failures ? 1 : 0;  // exit with non-zero status if there were failures
                 callback(!!failures);
             });
-        }
+        },
+        loaderClass.shutdown
     ];
 
     Utils.runSync(taskList);

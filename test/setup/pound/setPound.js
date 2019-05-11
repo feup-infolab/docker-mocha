@@ -22,7 +22,9 @@ class SetPound extends Init
         super.init(callback);
     }
 
-    static shutdown(callback){callback(null)}
+    static shutdown(callback){
+        super.shutdown(callback);
+    }
 }
 
 module.exports = SetPound;

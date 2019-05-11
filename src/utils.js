@@ -65,6 +65,7 @@ Utils.runSync = function(taskList)
 
             callback(err, results);
             clearTimeout(taskTimeout);
+            clearTimeout(sleepTimeout);
         });
     };
 

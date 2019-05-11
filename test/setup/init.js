@@ -1,8 +1,12 @@
 const request = require('request');
 const argv = require('yargs').argv;
 const port = 3000;
+const path = require("path");
 
-const InitZero = require("setup/initZero");
+
+// console.log(`ESTOU AQUI antes do INITZERO: ${process.cwd()}`);
+
+const InitZero = require(path.join(process.cwd(),"/setup/initZero"));
 
 class Init extends InitZero
 {
@@ -20,7 +24,9 @@ class Init extends InitZero
         super.init(callback);
     }
 
-    static shutdown(callback){callback(null)}
+    static shutdown(callback){
+        super.shutdown(callback);
+    }
 }
 
 module.exports = Init;
