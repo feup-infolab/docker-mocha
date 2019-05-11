@@ -34,9 +34,14 @@
     "nyc": "^13.3.0"
   },
   "scripts": {
-    "test": "docker rmi -f nuno/node-currency:latest; cd test; docker build --no-cache -t nuno/node-currency:latest .; cd .. ; node ./docker-mocha-run.js -f ./test/test/tests.json -t 1 -c ./test/docker-compose.yml -e dendro -p 3000 --config docker_mocha",
+    "test": "npm run delete-and-rebuld; npm run copy-files; npm run run-test; npm run delete-files",
     "coverage": "nyc --temp-directory=coverage --reporter=lcov npm test",
-    "report-coverage": "node ./node_modules/.bin/codacy-coverage < ./coverage/lcov.info"
+    "report-coverage": "node ./node_modules/.bin/codacy-coverage < ./coverage/lcov.info",
+
+    "delete-and-rebuild": "docker rmi -f nuno/node-currency:latest; cd test; docker build --no-cache -t nuno/node-currency:latest .; cd .. ",
+    "run-test": "export TEST_ENV_DOCKER_MOCHA=true; node ./docker-mocha-run.js -f ./test/test/tests.json -t 1 -c ./test/docker-compose.yml -e dendro -p 3000 --config docker_mocha",
+    "copy-files": "cp src/* test/src/*; cp doker-mocha-run.js test/docker-mocha-run.js",
+    "delete-files": "cd test; rm docker-mocha-run.js; cd src; rm DockerManager.js; rm DocherMocha.js; rm graph.py; rm utils.js; rm test cd ../.."
   },
   "bin": {
     "docker-mocha": "./docker-mocha-run.js",
