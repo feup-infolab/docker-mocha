@@ -379,6 +379,18 @@ else if(setupFile) // run a setup. Needs the init, load and shutdown methods of 
         loaderClass.init,
         function(callback)
         {
+            if(dockerMocha.port)
+            {
+                console.log("Waiting for server on port " + dockerMocha.port + " to be available, as specified by the -p argument of docker-mocha.");
+                Utils.checkConnectivityOnPort(dockerMocha.port, callback);
+            }
+            else
+            {
+                callback(null);
+            }
+        },
+        function(callback)
+        {
             console.log("Ran INIT of " + loaderClass.name);
             callback(null);
         },

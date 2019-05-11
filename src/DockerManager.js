@@ -501,7 +501,12 @@ DockerManager.runSetup = function(container, state, dockerMocha, callback)
         configOption = `--config='${dockerMocha.deployment_config}'`
     }
 
-    const command = `docker exec ${container} ${dockerMochaCommand} --setupFile ${setupPath} ${configOption}`;
+    let command;
+    if(dockerMocha.port)
+        command = `docker exec ${container} ${dockerMochaCommand} -p ${dockerMocha.port} --setupFile ${setupPath} ${configOption}`;
+    else
+        command = `docker exec ${container} ${dockerMochaCommand} --setupFile ${setupPath} ${configOption}`;
+
     console.log("Running setup in: " + container + " . " + command);
 
     const newProcess = childProcess.exec(command,
@@ -547,7 +552,12 @@ DockerManager.runTest = function(container, test, testPath, dockerMocha, callbac
 
     console.log(`State needed for test ${test} in ${testPath}: ${stateNeeded}. Loading from ${setupPath}`);
 
-    const command = `docker exec ${container} ${dockerMochaCommand} --testFile ${testPath} --setupFile ${setupPath} ${configOption}`;
+    let command;
+    if(dockerMocha.port)
+        command = `docker exec ${container} ${dockerMochaCommand} -p ${dockerMocha.port} --setupFile ${setupPath} ${configOption}`;
+    else
+        command = `docker exec ${container} ${dockerMochaCommand} --setupFile ${setupPath} ${configOption}`;
+
     console.log("Running test: " + test + " . " + command);
 
     const newProcess = childProcess.exec(command,
