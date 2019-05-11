@@ -91,18 +91,18 @@ Utils.runSync = function(taskList)
 
 Utils.checkConnectivityOnPort = function(port, callback, textToExpectOnSuccess)
 {
+
+    const host = "localhost";
+
+    let fullUrl = "http://" + host;
+
+    if (port)
+    {
+        fullUrl = fullUrl + ":" + port;
+    }
+
     const tryToConnect = function (callback)
     {
-        const host = "localhost";
-
-
-        let fullUrl = "http://" + host;
-
-        if (port)
-        {
-            fullUrl = fullUrl + ":" + port;
-        }
-
         console.log("Checking server connectivity via HTTP on Server " + fullUrl + "...");
 
         request.get({

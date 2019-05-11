@@ -34,9 +34,7 @@
     "nyc": "^13.3.0"
   },
   "scripts": {
-    "test": "docker rmi -f nuno/node-currency:latest; node ./docker-mocha-run.js -f ./test/test/tests.json -t 1 -c ./test/docker-compose.yml -e dendro -p 3000 --config docker_mocha",
-    "testing": "node ./docker-mocha-run.js --testing",
-    "setuping": "node ./docker-mocha-run.js --setuping",
+    "test": "docker rmi -f nuno/node-currency:latest; cd test; docker build --no-cache -t nuno/node-currency:latest .; cd .. ; node ./docker-mocha-run.js -f ./test/test/tests.json -t 1 -c ./test/docker-compose.yml -e dendro -p 3000 --config docker_mocha",
     "coverage": "nyc --temp-directory=coverage --reporter=lcov npm test",
     "report-coverage": "node ./node_modules/.bin/codacy-coverage < ./coverage/lcov.info"
   },
