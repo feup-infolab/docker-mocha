@@ -78,7 +78,7 @@ Utils.runSync = function(taskList)
         sleepTimeout = setTimeout(function() {
             if(!result)
             {
-                console.log('Operation sleeping...');
+                // console.log('Operation sleeping...');
                 clearTimeout(sleepTimeout);
                 sleepTimeout = null;
                 sleep();
@@ -94,7 +94,7 @@ Utils.checkConnectivityOnPort = function(port, callback, textToExpectOnSuccess)
     const tryToConnect = function (callback)
     {
         const host = "localhost";
-        console.log("Checking virtuoso connectivity via HTTP on Port " + port + "...");
+
 
         let fullUrl = "http://" + host;
 
@@ -102,6 +102,8 @@ Utils.checkConnectivityOnPort = function(port, callback, textToExpectOnSuccess)
         {
             fullUrl = fullUrl + ":" + port;
         }
+
+        console.log("Checking server connectivity via HTTP on Server " + fullUrl + "...");
 
         request.get({
                 url: fullUrl
@@ -116,7 +118,7 @@ Utils.checkConnectivityOnPort = function(port, callback, textToExpectOnSuccess)
                     }
                     else
                     {
-                        callback(1, "Response not matched when checking for connectivity on " + host + " : " + port);
+                        callback(1, "Response not matched when checking for connectivity on " + fullUrl);
                     }
                 }
                 else
@@ -127,7 +129,7 @@ Utils.checkConnectivityOnPort = function(port, callback, textToExpectOnSuccess)
                     }
                     else
                     {
-                        callback(1, "Unable to contact Server at " + host + " : " + port);
+                        callback(1, "Unable to contact Server at " + fullUrl);
                     }
                 }
             });
@@ -140,7 +142,7 @@ Utils.checkConnectivityOnPort = function(port, callback, textToExpectOnSuccess)
         interval: function (retryCount)
         {
             const msecs = 1000;
-            console.log("Waiting " + msecs / 1000 + " seconds to retry a connection to Virtuoso");
+            console.log("Waiting " + msecs / 1000 + " seconds to retry a connection to server at "+ fullUrl);
             return msecs;
         }
     }, tryToConnect, function (err)
@@ -151,7 +153,7 @@ Utils.checkConnectivityOnPort = function(port, callback, textToExpectOnSuccess)
         }
         else
         {
-            const msg = `Unable to establish a connection to server in time on: ${host}:${port} This is a fatal error.`;
+            const msg = `Unable to establish a connection to server in time on: ${fullUrl}. This is a fatal error.`;
             console.log(msg);
             throw new Error(msg);
         }
