@@ -434,7 +434,6 @@ else if(setupFile) // run a setup. Needs the init, load and shutdown methods of 
     Utils.runSync(taskList);
 }
 
-
 function manager()
 {
     if(Utils.isNull(dockerMocha.rootState))

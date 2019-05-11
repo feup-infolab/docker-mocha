@@ -31,6 +31,14 @@ Utils.runSync = function(taskList)
     let error;
     let taskTimeout;
     let sleepTimeout;
+    let allTimeouts = [];
+
+    const clearAllTimeouts = function()
+    {
+        for (let i = 0; i < allTimeouts.length; i++) {
+            clearTimeout(allTimeouts[i]);
+        }
+    };
 
     const timeout = function(callback)
     {
@@ -43,10 +51,13 @@ Utils.runSync = function(taskList)
                     console.log("Task timed out during synchronous operation");
                     result = "timeout";
                     callback();
+                    clearTimeout(taskTimeout);
                 }
             },
             60 * 1000
         );
+
+        allTimeouts.push(taskTimeout);
     };
     const performTasks = function(callback)
     {
@@ -64,8 +75,6 @@ Utils.runSync = function(taskList)
             console.log("Ran all tasks in list with result: "  + result);
 
             callback(null, results);
-            clearTimeout(taskTimeout);
-            clearTimeout(sleepTimeout);
         });
     };
 
@@ -81,10 +90,16 @@ Utils.runSync = function(taskList)
             {
                 console.log('Operation sleeping...');
                 clearTimeout(sleepTimeout);
-                sleepTimeout = null;
                 sleep();
             }
+            else
+            {
+                console.log("Clearing all timeouts!");
+                clearAllTimeouts();
+            }
         }, 100);
+
+        allTimeouts.push(sleepTimeout);
     }
 
     sleep();
