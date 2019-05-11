@@ -1,4 +1,4 @@
-const request =s require('request');
+const request = require('request');
 const port = 3000;
 
 const Init = require("../init");

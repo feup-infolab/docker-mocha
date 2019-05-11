@@ -94,7 +94,6 @@ Utils.checkConnectivityOnPort = function(port, callback, textToExpectOnSuccess)
     const tryToConnect = function (callback)
     {
         const host = "localhost";
-        const textToExpectOnSuccess = textToExpectOnSuccess;
         console.log("Checking virtuoso connectivity via HTTP on Port " + port + "...");
 
         let fullUrl = "http://" + host;
