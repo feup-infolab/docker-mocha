@@ -9,7 +9,9 @@ class InitZero
         server(callback);
     }
 
-    static shutdown(callback){callback(null)}
+    static shutdown(callback){
+        server.server.close(callback);
+    }
 }
 
 module.exports = InitZero;

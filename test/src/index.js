@@ -5,7 +5,7 @@ const file = 'currency.json';
 const path = folder + '/' + file;
 
 const app = express();
-
+let myExports = exports;
 
 exports.start = (callback, port = 3000) =>
 {
@@ -99,19 +99,18 @@ exports.start = (callback, port = 3000) =>
         });
     });
 
-    server = app.listen(port, () =>
+    let server = app.listen(port, () =>
     {
         console.log(`App listening on port ${port}!`);
+        myExports.server = server;
         if(callback != null)
             callback();
     });
-
-    exports.server = server;
 };
-
 
 exports.stop = () =>
 {
     console.log('Closing app!');
     this.server.close();
 };
+
