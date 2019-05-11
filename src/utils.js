@@ -112,7 +112,11 @@ Utils.checkConnectivityOnPort = function(port, callback, textToExpectOnSuccess)
             {
                 if (!e)
                 {
-                    if (data.indexOf(textToExpectOnSuccess) > -1)
+                    if (!textToExpectOnSuccess)
+                    {
+                        callback(null);
+                    }
+                    else if (textToExpectOnSuccess && data.indexOf(textToExpectOnSuccess) > -1)
                     {
                         callback(null);
                     }
