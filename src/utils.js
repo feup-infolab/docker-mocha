@@ -63,7 +63,7 @@ Utils.runSync = function(taskList)
 
             console.log("Ran all tasks in list with result: "  + result);
 
-            callback(err, results);
+            callback(null, results);
             clearTimeout(taskTimeout);
             clearTimeout(sleepTimeout);
         });
