@@ -398,6 +398,7 @@ else if(setupFile) // run a setup. Needs the init, load and shutdown methods of 
             }
             else
             {
+                console.log("Skipping wait for service bootup as no -p argument was specified.");
                 callback(null);
             }
         },
