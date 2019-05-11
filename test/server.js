@@ -1,9 +1,9 @@
 const expressServer = require("./src/index");
 
 
-function f()
+function f(callback)
 {
-    expressServer.start();
+    expressServer.start(callback);
 }
 
 module.exports = f;

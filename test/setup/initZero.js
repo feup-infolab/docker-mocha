@@ -6,8 +6,7 @@ class InitZero
 
     static init(callback)
     {
-        server();
-        callback(null);
+        server(callback);
     }
 
     static shutdown(callback){callback(null)}
