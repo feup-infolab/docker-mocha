@@ -610,7 +610,7 @@ function createState(state, callback)
         if(exists)
         {
             data.push({
-                timestamp: startDateState,
+                timestamp: Utils.convertTimestamp(startDateState),
                 state: state,
                 event: "state_reused",
                 test: '',
@@ -622,7 +622,7 @@ function createState(state, callback)
         else
         {
             data.push({
-                timestamp: startDateState,
+                timestamp: Utils.convertTimestamp(startDateState),
                 state: state,
                 event: "state_create_start",
                 test: '',
@@ -642,7 +642,7 @@ function createState(state, callback)
                                 const stopDateState = new Date();
 
                                 data.push({
-                                    timestamp: stopDateState,
+                                    timestamp: Utils.convertTimestamp(stopDateState),
                                     state: state,
                                     event: "state_create_complete",
                                     test: '',
@@ -700,7 +700,7 @@ function runTest(test, callback)
                             const stopDateTest = new Date();
 
                             data.push({
-                                timestamp: stopDateTest,
+                                timestamp: Utils.convertTimestamp(stopDateTest),
                                 state: state,
                                 event: "test_concluded",
                                 test: test,

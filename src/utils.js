@@ -1,6 +1,7 @@
 const path = require('path');
 const async = require("async");
 const request = require("request");
+const moment = require("moment");
 
 const Utils = function () {};
 
@@ -178,6 +179,12 @@ Utils.checkConnectivityOnPort = function(port, callback, textToExpectOnSuccess)
             throw new Error(msg);
         }
     });
+};
+
+Utils.convertTimestamp = function(date)
+{
+    const convertedDate = moment(date.toISOString());
+    return convertedDate.utc().format('YYYY-MM-DD HH:mm:ss');
 };
 
 Utils.getTimeStamp = function()
