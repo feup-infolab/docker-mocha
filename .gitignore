@@ -66,4 +66,5 @@ test/src/DockerManager.js
 test/src/DockerMocha.js
 test/src/graph.py
 test/src/utils.js
-data.csv
+*.csv
+*.log

@@ -37,6 +37,7 @@ const dockerMocha = new DockerMocha();
 
 let passedTests = 0;
 let failedTests = 0;
+let failedTestsArray = [];
 
 let startTime;
 let finishTime;
@@ -59,6 +60,8 @@ const csvExporter = new ExportToCsv(csvOptions);
 
 let data = [];
 
+const timeStamp = Utils.getTimeStamp();
+const logFileName = "docker-mocha_" + timeStamp + ".log";
 
 for(let i in process.argv)
 {
@@ -571,7 +574,15 @@ function manager()
         });
 
         const csvData = csvExporter.generateCsv(data, true);
-        fs.writeFileSync('data.csv', csvData);
+        fs.writeFileSync('data_' + timeStamp + '.csv', csvData);
+
+        for(let i in failedTestsArray)
+        {
+            try
+            {
+                fs.appendFileSync(logFileName, failedTestsArray[i]);
+            } catch (err) {}
+        }
 
         process.exit(0);
     })
@@ -647,7 +658,10 @@ function runTest(test, callback)
                 DockerManager.runTest(info.entrypoint, test, testPath, dockerMocha, (err, result) =>
                 {
                     if (err)
+                    {
                         console.error("Test Failed: " + test);
+                        failedTestsArray.push(testPath);
+                    }
                     else
                         console.info("Test Passed: " + test);
 

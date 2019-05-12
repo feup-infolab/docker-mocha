@@ -178,9 +178,27 @@ Utils.checkConnectivityOnPort = function(port, callback, textToExpectOnSuccess)
             throw new Error(msg);
         }
     });
-}
+};
 
+Utils.getTimeStamp = function()
+{
+    const now = new Date();
 
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const day = now.getUTCDate();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const seconds = now.getSeconds();
+
+    return  year.toString() + "_" +
+            month.toString() + "_" +
+            day.toString() + "_" +
+            hour.toString() + "_" +
+            minute.toString() + "_" +
+            seconds.toString();
+
+};
 
 
 module.exports = Utils;
