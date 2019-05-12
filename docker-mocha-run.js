@@ -390,10 +390,11 @@ else if(testFile && setupFile) // run a test. Needs the init function of the set
                 callback(testsFailed);
             });
         },
-        function()
+        function(callback)
         {
             console.log("Exiting after running shutdown of " + loaderClass.name);
             process.exit(testsFailed);
+            callback();
         }
     ];
 
