@@ -587,7 +587,7 @@ function manager()
         {
             try
             {
-                fs.appendFileSync(logFileName, passedTestsArray[j]);
+                fs.appendFileSync(logFileName, passedTestsArray[j] + "\n");
             } catch (err) {}
         }
 
@@ -597,7 +597,7 @@ function manager()
         {
             try
             {
-                fs.appendFileSync(logFileName, failedTestsArray[i]);
+                fs.appendFileSync(logFileName, failedTestsArray[i] + "\n");
             } catch (err) {}
         }
 
