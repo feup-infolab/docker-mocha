@@ -88,7 +88,7 @@ Utils.runSync = function(taskList)
         sleepTimeout = setTimeout(function() {
             if(!result)
             {
-                console.log('Operation sleeping...');
+                // console.log('Operation sleeping...');
                 clearTimeout(sleepTimeout);
                 sleep();
             }
