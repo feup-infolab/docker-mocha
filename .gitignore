@@ -68,3 +68,4 @@ test/src/graph.py
 test/src/utils.js
 *.csv
 *.log
+.Rproj.user
