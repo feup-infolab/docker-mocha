@@ -50,8 +50,8 @@ const csvOptions = {
     quoteStrings: '"',
     decimalSeparator: '.',
     showLabels: true,
-    showTitle: true,
-    title: 'Docker-Mocha Details',
+    showTitle: false,
+    // title: 'Docker-Mocha Details',
     useTextFile: false,
     useBom: true,
     useKeysAsHeaders: true,
@@ -566,14 +566,6 @@ function manager()
         //console.log("Docker Mocha skipped " + ((Object.keys(dockerMocha.testsMap).length) - (passedTests+failedTests)) + " tests");
         console.log("Execution finished in " + hours + " hour(s), " + minutes + " minute(s) and " + seconds + " seconds");
 
-        data.push({
-            state: '',
-            stateTime: '',
-            test: '',
-            testTime: '',
-            total: res
-        });
-
         const csvData = csvExporter.generateCsv(data, true);
         fs.writeFileSync('data_' + timeStamp + '.csv', csvData);
 
@@ -617,10 +609,26 @@ function createState(state, callback)
     {
         if(exists)
         {
-            callback(0)
+            data.push({
+                timestamp: startDateState,
+                state: state,
+                event: "state_reused",
+                test: '',
+                time_taken: 0
+            });
+
+            callback(0);
         }
         else
         {
+            data.push({
+                timestamp: startDateState,
+                state: state,
+                event: "state_create_start",
+                test: '',
+                time_taken: 0
+            });
+
             DockerManager.StopAndRemoveContainers(state, dockerMocha, () =>
             {
                 DockerManager.RemoveNetworks(state, dockerMocha, () =>
@@ -634,11 +642,11 @@ function createState(state, callback)
                                 const stopDateState = new Date();
 
                                 data.push({
+                                    timestamp: stopDateState,
                                     state: state,
-                                    stateTime: Math.abs(stopDateState - startDateState) / 1000,
+                                    event: "state_create_complete",
                                     test: '',
-                                    testTime: '',
-                                    total: '',
+                                    time_taken: Math.abs(stopDateState - startDateState) / 1000,
                                 });
 
                                 callback(err);
@@ -692,11 +700,11 @@ function runTest(test, callback)
                             const stopDateTest = new Date();
 
                             data.push({
-                                state: '',
-                                stateTime: '',
+                                timestamp: stopDateTest,
+                                state: state,
+                                event: "test_concluded",
                                 test: test,
-                                testTime: Math.abs(stopDateTest - startDateTest) / 1000,
-                                total: ''
+                                time_taken: Math.abs(stopDateTest - startDateTest) / 1000,
                             });
 
                             callback(err);
