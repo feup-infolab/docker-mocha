@@ -450,24 +450,31 @@ function manager()
             //In case no Checkpoint flag, immediately unlock
             if (dockerMocha.noCheckpoint)
             {
-                const childTests = dockerMocha.dependencyMap[task["name"]]["child_tests"];
-                const childStates = dockerMocha.dependencyMap[task["name"]]["child_states"];
-
-                //unlock all the child states
-                for (const i in childStates)
+                if(Utils.isNull(dockerMocha.dependencyMap[task["name"]])) //in case it does no have dependencies
                 {
-                    const state = childStates[i];
-                    queue.push({"type": "state", "name": state});
+                    callback(null);
                 }
-
-                //unlock all the child tests
-                for (const j in childTests)
+                else
                 {
-                    const test = childTests[j];
-                    queue.push({"type": "test", "name": test});
-                }
+                    const childTests = dockerMocha.dependencyMap[task["name"]]["child_tests"];
+                    const childStates = dockerMocha.dependencyMap[task["name"]]["child_states"];
 
-                callback(null);
+                    //unlock all the child states
+                    for (const i in childStates)
+                    {
+                        const state = childStates[i];
+                        queue.push({"type": "state", "name": state});
+                    }
+
+                    //unlock all the child tests
+                    for (const j in childTests)
+                    {
+                        const test = childTests[j];
+                        queue.push({"type": "test", "name": test});
+                    }
+
+                    callback(null);
+                }
             }
             else
             {
@@ -479,24 +486,32 @@ function manager()
                     }
                     else
                     {
-                        const childTests = dockerMocha.dependencyMap[task["name"]]["child_tests"];
-                        const childStates = dockerMocha.dependencyMap[task["name"]]["child_states"];
 
-                        //unlock all the child tests
-                        for (const j in childTests)
+                        if(Utils.isNull(dockerMocha.dependencyMap[task["name"]]))
                         {
-                            const test = childTests[j];
-                            queue.push({"type": "test", "name": test});
+                            callback(null);
                         }
-
-                        //unlock all the child states
-                        for (const i in childStates)
+                        else
                         {
-                            const state = childStates[i];
-                            queue.push({"type": "state", "name": state});
-                        }
+                            const childTests = dockerMocha.dependencyMap[task["name"]]["child_tests"];
+                            const childStates = dockerMocha.dependencyMap[task["name"]]["child_states"];
 
-                        callback(null);
+                            //unlock all the child tests
+                            for (const j in childTests)
+                            {
+                                const test = childTests[j];
+                                queue.push({"type": "test", "name": test});
+                            }
+
+                            //unlock all the child states
+                            for (const i in childStates)
+                            {
+                                const state = childStates[i];
+                                queue.push({"type": "state", "name": state});
+                            }
+
+                            callback(null);
+                        }
                     }
                 })
             }
