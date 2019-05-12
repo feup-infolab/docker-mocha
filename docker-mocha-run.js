@@ -387,14 +387,13 @@ else if(testFile && setupFile) // run a test. Needs the init function of the set
             loaderClass.shutdown(function()
             {
                 console.log("DOCKER-MOCHA: Finished shutdown of " + loaderClass.name + " with error: " + testsFailed);
-                callback(testsFailed);
+                callback(null);
             });
         },
-        function(callback)
+        function()
         {
             console.log("Exiting after running shutdown of " + loaderClass.name);
             process.exit(testsFailed);
-            callback();
         }
     ];
 
