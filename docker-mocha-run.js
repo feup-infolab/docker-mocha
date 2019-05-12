@@ -386,10 +386,17 @@ else if(testFile && setupFile) // run a test. Needs the init function of the set
             loaderClass.shutdown(function(){
                 callback(testsFailed);
             });
+        },
+        function(callback)
+        {
+            console.log("Exiting after running shutdown of " + loaderClass.name);
+            process.exit(testsFailed);
         }
     ];
 
     Utils.runSync(taskList);
+    console.log("After Run Sync, test + setup");
+
 }
 else if(setupFile) // run a setup. Needs the init, load and shutdown methods of the setupFile
 {
@@ -426,12 +433,13 @@ else if(setupFile) // run a setup. Needs the init, load and shutdown methods of 
         loaderClass.shutdown,
         function(callback)
         {
-            console.log("Ran SHUTDOWN of " + loaderClass.name);
-            callback(null);
+            console.log("Exiting after running shutdown of " + loaderClass.name);
+            process.exit(0);
         }
     ];
 
     Utils.runSync(taskList);
+    console.log("After Run Sync, setup");
 }
 
 function manager()
