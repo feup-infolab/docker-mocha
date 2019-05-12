@@ -25,6 +25,23 @@ for (k,v) in states.items():
     if v["depends_on"] is not None:
         G.add_edge(k, v["depends_on"])
 
-nx.draw(G, with_labels=True, font_size=8)
+tests = data["tests"]
+mapping = {};
+
+for (k, v) in tests.items():
+    depedends = tests[k]["state"]
+    if depedends in mapping:
+        mapping[depedends] = mapping[depedends] + 1
+    else:
+        mapping[depedends] = 1
+
+mapping2 = {}
+
+for (k, v) in mapping.items():
+    mapping2[k] = k + ": " + str(v)
+
+G = nx.relabel_nodes(G, mapping2)        
+
+nx.draw(G, with_labels=True, font_size=12)
 
 plt.show();
