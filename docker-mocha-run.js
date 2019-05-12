@@ -38,6 +38,7 @@ const dockerMocha = new DockerMocha();
 let passedTests = 0;
 let failedTests = 0;
 let failedTestsArray = [];
+let passedTestsArray = [];
 
 let startTime;
 let finishTime;
@@ -576,6 +577,22 @@ function manager()
         const csvData = csvExporter.generateCsv(data, true);
         fs.writeFileSync('data_' + timeStamp + '.csv', csvData);
 
+        fs.appendFileSync(logFileName, "Execution started with Timestamp: " + timeStamp + "\n");
+        fs.appendFileSync(logFileName, "Execution finished in " + hours + " hour(s), " + minutes + " minute(s) and " + seconds + " seconds" + "\n");
+        fs.appendFileSync(logFileName, "Docker Mocha finished with " + passedTests + "/" + (passedTests+failedTests) + " passed tests" + "\n");
+        fs.appendFileSync(logFileName, "Docker Mocha executed " + (passedTests+failedTests) + "/" + Object.keys(dockerMocha.testsMap).length + "\n");
+
+        fs.appendFileSync(logFileName, "\nPASSED TESTS:\n");
+        for(let j in passedTestsArray)
+        {
+            try
+            {
+                fs.appendFileSync(logFileName, passedTestsArray[j]);
+            } catch (err) {}
+        }
+
+
+        fs.appendFileSync(logFileName, "\n\nFAILED TESTS:\n");
         for(let i in failedTestsArray)
         {
             try
@@ -663,7 +680,10 @@ function runTest(test, callback)
                         failedTestsArray.push(testPath);
                     }
                     else
+                    {
+                        passedTestsArray.push(testPath);
                         console.info("Test Passed: " + test);
+                    }
 
                     DockerManager.logEntrypoint(info.entrypoint, dockerMocha, () =>
                     {
