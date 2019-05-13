@@ -24,10 +24,11 @@
     "better-queue": "^3.8.10",
     "export-to-csv": "^0.2.1",
     "js-yaml": "^3.12.2",
+    "mocha": "^6.1.4",
+    "moment": "^2.24.0",
     "request": "^2.88.0",
     "underscore": "^1.9.1",
-    "yargs": "^13.2.2",
-    "mocha": "^6.1.4"
+    "yargs": "^13.2.2"
   },
   "devDependencies": {
     "codacy-coverage": "^3.4.0",
@@ -38,7 +39,6 @@
     "coverage": "nyc --temp-directory=coverage --reporter=lcov npm test",
     "report-coverage": "node ./node_modules/.bin/codacy-coverage < ./coverage/lcov.info",
     "graph": "./src/graph.py test/test/tests-structure.json",
-
     "delete-and-rebuild": "docker rmi -f nuno/node-currency:latest; cd test; docker build --no-cache -t nuno/node-currency:latest .; cd .. ",
     "run-test": "export TEST_ENV_DOCKER_MOCHA=true; node ./docker-mocha-run.js -f ./test/test/tests.json -t 12 -c ./test/docker-compose.yml -e dendro -p 3000 --config docker_mocha",
     "copy-files": "cp -R src/* test/src; cp docker-mocha-run.js test/docker-mocha-run.js",
