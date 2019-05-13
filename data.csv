@@ -1,0 +1,14 @@
+﻿Docker-Mocha Details
+
+state,stateTime,test,testTime,total
+"init",14.565,"","",""
+"","","init",15.593,""
+"setDollar",15.832,"","",""
+"setPound",16.053,"","",""
+"","","setPound",17.765,""
+"","","setDollar",18.175,""
+"testDollar",18.391,"","",""
+"testPound",25.593,"","",""
+"","","testDollar",17.005,""
+"","","testPound",14.929,""
+"","","","",71.871
