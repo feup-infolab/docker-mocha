@@ -1,0 +1,24 @@
+﻿Docker-Mocha Details
+
+state,stateTime,test,testTime,total
+"BootupUnit",79.4,"","",""
+"LoadOntologies",47.493,"","",""
+"CreateUsersUnit",46.581,"","",""
+"","","users",32.956,""
+"CreateProjectsUnit",43.61,"","",""
+"CreateAvatarsForUsersUnit",36.833,"","",""
+"AddContributorsToProjectsUnit",40.402,"","",""
+"CreateFoldersPublicProject",53.646,"","",""
+"CreateFoldersUnit",68.218,"","",""
+"AddMetadataToFoldersPublicProject",50.193,"","",""
+"CreateFoldersForLsByName",48.565,"","",""
+"CreateFilesUnit",101.147,"","",""
+"AddMetadataToFoldersUnit",76.744,"","",""
+"DeleteFoldersUnit",63.818,"","",""
+"UploadFilesAndAddMetadataUnit",46.668,"","",""
+"CreateManualPostForAllProjectTypesUnit",39.933,"","",""
+"ShareSomePostsUnit",37.206,"","",""
+"LikeSomePostsUnit",38.023,"","",""
+"CommentSomePostsUnit",38.741,"","",""
+"CreateSocialDendroTimelineWithPostsAndSharesUnit",33.827,"","",""
+"","","","",728.154

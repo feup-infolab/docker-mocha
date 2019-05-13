@@ -1,0 +1,16 @@
+﻿timestamp,state,event,test,time_taken
+Sun May 12 2019 22:31:58 GMT+0100 (WEST),"init","state_create_start","",0
+Sun May 12 2019 22:32:13 GMT+0100 (WEST),"init","state_create_complete","",14.856
+Sun May 12 2019 22:32:13 GMT+0100 (WEST),"setPound","state_create_start","",0
+Sun May 12 2019 22:32:13 GMT+0100 (WEST),"setDollar","state_create_start","",0
+Sun May 12 2019 22:32:28 GMT+0100 (WEST),"init","test_concluded","init",15.678
+Sun May 12 2019 22:32:28 GMT+0100 (WEST),"setPound","state_create_complete","",15.819
+Sun May 12 2019 22:32:28 GMT+0100 (WEST),"testPound","state_create_start","",0
+Sun May 12 2019 22:32:29 GMT+0100 (WEST),"setDollar","state_create_complete","",16.88
+Sun May 12 2019 22:32:29 GMT+0100 (WEST),"testDollar","state_create_start","",0
+Sun May 12 2019 22:32:44 GMT+0100 (WEST),"setPound","test_concluded","setPound",15.873
+Sun May 12 2019 22:32:45 GMT+0100 (WEST),"setDollar","test_concluded","setDollar",15.443
+Sun May 12 2019 22:32:45 GMT+0100 (WEST),"testDollar","state_create_complete","",15.81
+Sun May 12 2019 22:32:45 GMT+0100 (WEST),"testPound","state_create_complete","",16.965
+Sun May 12 2019 22:33:00 GMT+0100 (WEST),"testPound","test_concluded","testPound",14.601
+Sun May 12 2019 22:33:00 GMT+0100 (WEST),"testDollar","test_concluded","testDollar",14.843

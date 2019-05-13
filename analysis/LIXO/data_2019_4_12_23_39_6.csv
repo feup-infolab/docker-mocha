@@ -1,0 +1,13 @@
+﻿Docker-Mocha Details
+
+state,stateTime,test,testTime,total
+"BootupUnit",76.814,"","",""
+"LoadOntologies",41.104,"","",""
+"CreateUsersUnit",39.219,"","",""
+"","","users",46.735,""
+"CreateAvatarsForUsersUnit",48.793,"","",""
+"CreateProjectsUnit",56.155,"","",""
+"AddContributorsToProjectsUnit",37.167,"","",""
+"CreateFoldersPublicProject",45.666,"","",""
+"CreateFoldersUnit",60.396,"","",""
+"","","","",1503.204

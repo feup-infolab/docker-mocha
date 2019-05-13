@@ -66,6 +66,6 @@ test/src/DockerManager.js
 test/src/DockerMocha.js
 test/src/graph.py
 test/src/utils.js
-*.csv
-*.log
+./*.csv
+./*.log
 .Rproj.user
