@@ -10,8 +10,8 @@
   "tests":
   {
     "init": {"state": "init", "path": "test/init.js"},
-    "setDollar": {"state": "setDollar", "path": "test/dollar/setDollar.js"},
     "setPound": {"state": "setPound", "path": "test/pound/setPound.js"},
+    "setDollar": {"state": "setDollar", "path": "test/dollar/setDollar.js"},
     "testDollar": {"state": "testDollar", "path": "test/dollar/testDollar.js"},
     "testPound": {"state": "testPound", "path": "test/pound/testPound.js"}
   }

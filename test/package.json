@@ -8,7 +8,8 @@
     "docker-mocha": "docker-mocha -f ./test/tests.json -t 2 -c docker-compose.yml -e dendro -p 3000",
     "graph": "docker-mocha-graph ./test/tests.json",
     "start": "node server.js",
-    "postinstall": "npm install -g git+https://github.com/feup-infolab/docker-mocha.git"
+    "postinstall": "npm install -g git+https://github.com/feup-infolab/docker-mocha.git",
+    "run-test-no-docker": "node ./docker-mocha-run.js -f ./test/tests.json -t 1 -c ./docker-compose.yml -e dendro -p 3000 --no-docker"
   },
   "author": "nuno.neto",
   "license": "ISC",

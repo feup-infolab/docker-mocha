@@ -17,6 +17,7 @@ class DockerMocha
 
         this.noCheckpoint = false;
         this.noDelete = false;
+        this.noDocke = false;
 
         this.deployment_config = null;
     }
