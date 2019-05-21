@@ -16,7 +16,7 @@ describe('Testing get Pound', function()
         request('http://localhost:' + port + '/get/pound?euro=' + euro, {json:true}, (err, res, body) =>
         {
             assert.equal(200, res.statusCode);
-            assert.equal(body.error, 2);
+            assert.equal(body.error, 0);
             assert.equal(body.pounds, value);
             done();
         })

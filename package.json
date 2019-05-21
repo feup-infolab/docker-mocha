@@ -45,7 +45,7 @@
     "run-test": "node ./docker-mocha-run.js -f ./test/test/tests.json -t 12 -c ./test/docker-compose.yml -e dendro -p 3000 --config docker_mocha",
     "run-test-no-checkpoint": "node ./docker-mocha-run.js -f ./test/test/tests.json -t 1 -c ./test/docker-compose.yml -e dendro -p 3000 --config docker_mocha --no-checkpoint",
     "copy-files": "cp -R src/* test/src; cp docker-mocha-run.js test/docker-mocha-run.js",
-    "delete-files": "cd test; rm docker-mocha-run.js; cd src; rm DockerManager.js; rm DockerMocha.js; rm graph.py; rm utils.js; cd ../.."
+    "delete-files": "cd test; rm docker-mocha-run.js; cd src; rm DockerManager.js; rm DockerMocha.js; rm NoDocker.js; rm graph.py; rm utils.js; cd ../.."
   },
   "bin": {
     "docker-mocha": "./docker-mocha-run.js",

@@ -95,6 +95,11 @@ class DockerMocha
         return this.testsMap[test]["path"];
     }
 
+    getTestsList()
+    {
+        return Object.keys(this.testsMap);
+    }
+
     addTest(test, testsProp)
     {
         if(Utils.isNull(this.dependencyMap[testsProp["state"]]))

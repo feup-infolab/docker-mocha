@@ -69,3 +69,5 @@ test/src/utils.js
 ./*.csv
 ./*.log
 .Rproj.user
+
+test/resources
