@@ -243,7 +243,7 @@ DockerManager.createState = function(state, dockerMocha, callback)
             {
                 DockerManager.stopEnvironment(stateParent, stateParent, dockerMocha, () =>
                 {
-                    DockerManager.startEnvironment(state, state, dockerMocha, (info) =>
+                    DockerManager.startEnvironment(state, stateParent, dockerMocha, (info) =>
                     {
                         /*
                         DockerManager.waitForConnection(info.entrypoint, dockerMocha.port, () =>
