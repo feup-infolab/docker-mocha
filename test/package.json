@@ -20,7 +20,7 @@
     "js-yaml": "^3.12.2",
     "request": "^2.88.0",
     "export-to-csv": "^0.2.1",
-    "underscore": "^1.9.1",
+    "underscore": "^1.12.1",
     "yargs": "^13.2.2",
     "moment": "^2.24.0"
   },
