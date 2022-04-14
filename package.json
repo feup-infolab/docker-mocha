@@ -20,7 +20,7 @@
   "license": "BSD-3-Clause",
   "main": "docker-mocha-run.js",
   "dependencies": {
-    "async": "^2.6.2",
+    "async": "^3.2.2",
     "better-queue": "^3.8.10",
     "export-to-csv": "^0.2.1",
     "js-yaml": "^3.12.2",
